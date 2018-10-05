@@ -1,26 +1,16 @@
-<mat-sidenav-container fullscreen>
-  <div>
-    <!-- (click)="sidenav.toggle()" -->
-    <mat-toolbar color="primary">
-      <button mat-icon-button>
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>Typescript Chat</span>
-    </mat-toolbar>
+<div>
+  <!-- (click)="sidenav.toggle()" -->
+  <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
 
-    <div class="app-content">
-      <router-outlet> </router-outlet>
-    </div>
-    <div class="footer" >
-        <nav mat-tab-nav-bar mat-stretch-tabs [backgroundColor]="background" class="demo-tab-group" style="text-align: center;">
-            <a mat-tab-link 
-               *ngFor="let link of ['home','call','game', 'people']"
-               [routerLink]="link"
-               routerLinkActive #rla="routerLinkActive"
-               [active]="rla.isActive">
-              {{link}}
-            </a>
-          </nav>
-    </div>
+  
+  <router-outlet> </router-outlet>
+  <div class="footer" *ngIf="isShow">
+    <nav mat-tab-nav-bar mat-stretch-tabs [backgroundColor]="background" class="demo-tab-group" style="text-align: center;">
+      <a mat-tab-link *ngFor="let link of ['home','profile','group', 'people']" [routerLink]="link" routerLinkActive #rla="routerLinkActive"
+        [active]="rla.isActive">
+        {{link}}
+      </a>
+    </nav>
   </div>
-</mat-sidenav-container>
+  
+</div>

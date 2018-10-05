@@ -1,9 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { MatDialogRef, MatDialog, MatTabHeaderPosition } from '@angular/material';
+import { MatDialogRef, MatDialog, MatTabHeaderPosition, MatSnackBar } from '@angular/material';
 import { DialogUserComponent } from 'app/home/dialog-user/dialog-user.component';
 import { DialogUserType } from 'app/home/dialog-user/dialog-user-type';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AppChatEventService } from 'app/app-chat-event.service';
+import { SocketService } from 'app/chat/shared/services/socket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'tcc-home',
@@ -12,7 +14,10 @@ import { AppChatEventService } from 'app/app-chat-event.service';
 })
 export class HomeComponent implements OnInit {
 
-  
+  getNotification: Subscription;
+  getFriend: Subscription;
+  getRoom: Subscription;
+  getHistories: Subscription;
   dialogRef: MatDialogRef<DialogUserComponent> | null;
   defaultDialogUserParams: any = {
     disableClose: true,
@@ -21,69 +26,101 @@ export class HomeComponent implements OnInit {
       dialogType: DialogUserType.NEW
     }
   };
-  listF: any = {};
+  users: any[] = [];
   user: any = {};
-  usersCurrent: any[] = [];
-  users: any[] = [
-    { id: 1, name: "thinh duong", username: "thinh_duong" },
-    { id: 2, name: "tri le", username: "tri_le" },
-    { id: 3, name: "phung nguyen", username: "phung_nguyen" },
-    { id: 4, name: "nhut trang", username: "nhut_trang" },
-    { id: 5, name: "le tran", username: "le_tran" }
-  ];
-  userWithuser: any[] = [
-    {
-      key: "thinh_duong",
-      listUsers: [
-        { id: 4, name: "nhut trang", username: "nhut_trang" },
-      ]
-    },
-    {
-      key: "nhut_trang",
-      listUsers: [
-        { id: 1, name: "thinh duong", username: "thinh_duong" },
-      ]
-    },
-    {
-      key: "tri_le",
-      listUsers: [
-        { id: 3, name: "phung nguyen", username: "phung_nguyen" },
-        { id: 4, name: "nhut trang", username: "nhut_trang" },
-        { id: 5, name: "le tran", username: "le_tran" }
-      ]
-    }
-  ]
-  aaaaa:string="aaaaa";
-  constructor(private event:AppChatEventService,public dialog: MatDialog,private router: Router,private route: ActivatedRoute) {
+  rooms: any[] = [];
+  histories: any[] = [];
+  IsShow: boolean = true;
+  isLoading: boolean;
+  constructor(private event: AppChatEventService,
+    private socketService: SocketService,
+    public dialog: MatDialog,
+    public snackBar: MatSnackBar,
+    private router: Router, private route: ActivatedRoute) {
     // setTimeout(() => {
     //   this.openUserPopup(this.defaultDialogUserParams);
     // }, 0);
-    
-    
-   }
+    this.user = this.event.getUser();
+    console.log(this.event.getUser());
+    if (!this.user) {
+      this.router.navigate(['login']);
+    }
+    this.socketService.initSocket();
+    this.socketService.getHistories(this.user.id);
+    this.socketService.getFriend(this.user.id);
+    this.socketService.getRoom(this.user.id);
+    this.getNotification = this.socketService.onGetNotification().subscribe(data => {
+      console.log(data);
+      let index = data.to.findIndex(x => x == this.user.id);
+      if (index > -1) {
 
-  ngOnInit() {
-      let username = this.event.getUserName;
-      this.user = this.users.find(x=>x.username == username);
+        if (data.type == "addRoom") {
+          this.socketService.getRoom(this.user.id);
+        }
+        if (data.type == "addFriend") {
+          this.socketService.getFriend(this.user.id);
+        }
+        if (data.type == "addMess") {
+          this.socketService.getHistories(this.user.id);
+        }
 
-      this.usersCurrent = this.userWithuser.find(x=>x.key == username).listUsers;
-      this.listF = {
-        username:this.user,
-        listUser:this.usersCurrent
+        let message = data.from.name + " : " + data.content;
+        this.snackBar.open(message, "", {
+          duration: 2000,
+          verticalPosition: 'top',
+          horizontalPosition: 'center'
+        });
       }
+    })
   }
 
+  ngOnInit() {
+  
+
+
+    // this.socketService.notification(user.id);
+    this.getRoom = this.socketService.onGetRoom().subscribe(data => {
+      this.rooms = data;
+      console.log(data);
+    })
+    // openSnackBar(message: string, action: string) {
+    //   this.snackBar.open(message, action, {
+    //     duration: 2000,
+    //   });
+    // }
+
+    this.getHistories = this.socketService.onGetHistories().subscribe(data => {
+      this.histories = data;
+      console.log(data);
+      this.isLoading = false;
+      this.event.getisLoading.emit(this.isLoading);
+    })
+
+
+
+    this.getFriend = this.socketService.onGetFriend().subscribe(data => {
+      this.users = data;
+      console.log(data);
+    })
+    this.event.getIsShow.emit(this.IsShow);
+  }
+  ngOnDestroy() {
+    this.getNotification.unsubscribe();
+    this.getFriend.unsubscribe();
+    this.getRoom.unsubscribe();
+    this.getHistories.unsubscribe();
+  }
   // private openUserPopup(params): void {
   //   this.dialogRef = this.dialog.open(DialogUserComponent, params);
   //   this.dialogRef.afterClosed().subscribe(paramsDialog => {
   //     if (!paramsDialog) {
   //       return;
   //     }
-      
+
 
   //   });
   // }
-  private chat(user):void{
-    this.router.navigate(['chat',{from:this.user.name,to:user.username}]); 
+  private chat(user): void {
+
   }
 }

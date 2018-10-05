@@ -14,10 +14,16 @@ export class SocketService {
 
     public initSocket(): void {
         this.socket = socketIo(SERVER_URL);
+
+        // this.socket.emit('notification');
     }
 
     public send(message: any): void {
         this.socket.emit('message', message);
+    }
+
+    public notification(id:string){
+        this.socket.emit('notification',id);
     }
 
     public join(data:any):void{
@@ -28,9 +34,96 @@ export class SocketService {
         this.socket.emit('leave',data);
     }
     
-
+    public getHistories(id:string){
+        this.socket.emit('getHistoyies',id);
+    }
+    
     public loadingRoom(data:any){
         this.socket.emit('loadingRoom',data);
+    }
+
+    public login(data:any){
+        this.socket.emit('login',data);
+    }
+
+    public getAllUser(id:string){
+        this.socket.emit('getAllUser',id);
+    }
+
+    public getFriend(id:string){   
+        this.socket.emit('getFriend',id);
+    }
+
+    public addFriend(data:any){
+        this.socket.emit('addFriend',data);
+    }
+
+    public createRoom(data:any){
+        this.socket.emit('createRoom',data);
+    }
+
+    public getRoom(id:string){
+        this.socket.emit('getRoom',id);
+    }
+    
+    public onGetNotification(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('notification', (data: any) => observer.next(data));
+        });
+    }
+    public onGetHistories(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('getHistoyies', (data: any) => observer.next(data));
+        });
+    }
+    public onGetRoom(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('getRoom', (data: any) => observer.next(data));
+        });
+    }
+
+
+    public onCreateRoom(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('createRoom', (data: any) => observer.next(data));
+        });
+    }
+
+    public onGetFriend(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('getFriend', (data: any) => observer.next(data));
+        });
+    }
+  
+    public onAddFriend(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('addFriend', (data: any) => observer.next(data));
+        });
+    }
+    public onAddFriends(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('addFriends', (data: any) => observer.next(data));
+        });
+    }
+
+
+    public onGetAllUser(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('getAllUser', (data: any) => observer.next(data));
+        });
+    }
+
+    public onGetUserInfo(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('getUserInfo', (data: any) => observer.next(data));
+        });
+    }
+
+
+    public onLogin(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('login', (data: any) => observer.next(data));
+        });
     }
 
     public onLoadingRoom(): Observable<any> {

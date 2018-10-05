@@ -14,10 +14,17 @@ import { HomeModule } from 'app/home/home.module';
 import { DialogUserComponent } from 'app/login/dialog-login/dialog-user.component';
 import { LoginModule } from 'app/login/login.module';
 import { AppChatEventService } from 'app/app-chat-event.service';
+import { PeopleComponent } from './people/people.component';
+import { SocketService } from 'app/chat/shared/services/socket.service';
+import { GroupComponent } from './group/group.component';
+import { ProfileComponent } from './profile/profile.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    PeopleComponent,
+    GroupComponent,
+    ProfileComponent
   ],
   imports: [
     FormsModule,
@@ -32,7 +39,7 @@ import { AppChatEventService } from 'app/app-chat-event.service';
     HomeModule,
     LoginModule
   ],
-  providers: [AppComponent,AppChatEventService],
+  providers: [AppComponent,AppChatEventService,SocketService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

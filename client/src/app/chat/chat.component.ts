@@ -8,7 +8,7 @@ import { User } from './shared/model/user';
 import { SocketService } from './shared/services/socket.service';
 import { DialogUserComponent } from './dialog-user/dialog-user.component';
 import { DialogUserType } from './dialog-user/dialog-user-type';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscriber } from 'rxjs/Subscriber';
 import { AppChatEventService } from 'app/app-chat-event.service';
 
@@ -27,10 +27,12 @@ export class ChatComponent implements OnInit, AfterViewInit {
   messages: Message[] = [];
   messageContent: string;
   ioConnection: any;
-  room:any = "";
-  user:any = "";
-  toUser:any = "";
-  history:any[] = [];
+  room_id: any = "";
+  room:any;
+  user: any = "";
+  toUser: any = "";
+  history: any[] = [];
+  IsShow:boolean=false;
   dialogRef: MatDialogRef<DialogUserComponent> | null;
   defaultDialogUserParams: any = {
     disableClose: true,
@@ -49,20 +51,27 @@ export class ChatComponent implements OnInit, AfterViewInit {
   constructor(private socketService: SocketService,
     public dialog: MatDialog,
     private route: ActivatedRoute,
-    private appChatEventService: AppChatEventService
-  ) { }
+    private event: AppChatEventService,
+    private router: Router
+
+  ) {
+    this.user = this.event.getUser();
+    if(!this.user){
+      this.router.navigate(['login']);
+    }
+    this.room =  this.event.getRoomInfo;
+   }
 
   ngOnInit(): void {
+    
+    this.event.getIsShow.emit(this.IsShow);
     this.initModel();
-    this.getUserChat = this.appChatEventService.getUserChat;
-
-      console.log(this.getUserChat);
-      this.user = this.getUserChat.from.username;
-      this.toUser = this.getUserChat.to.username;
-      this.room = this.user+"/"+this.toUser;
-      this.initIoConnection();
+  
+    this.room_id = this.event.getRoom || "defual";
+   
+    this.initIoConnection();
   }
-  ngOnDestroy():void{
+  ngOnDestroy(): void {
 
   }
   ngAfterViewInit(): void {
@@ -84,35 +93,37 @@ export class ChatComponent implements OnInit, AfterViewInit {
   private initModel(): void {
     // const randomId = this.getRandomId();
     // this.user.avatar = `${AVATAR_URL}/${randomId}.png`
-     
+
   }
 
   private initIoConnection(): void {
     this.socketService.initSocket();
-    
-    this.socketService.loadingRoom({name:this.user});
 
-    this.socketService.join({roomName:this.room,from:this.user});
+    // this.socketService.loadingRoom({ room_id: this.room });
+
+    this.socketService.join(this.room_id);
 
     this.ioConnection = this.socketService.onMessage()
       .subscribe((message: any) => {
+        console.log(this.messages);
         this.messages.push(message);
+      });
+
+
+    // this.socketService.onLoadingRoom().subscribe(data => {
+    //   this.history = data;
+    // });
+
+
+    this.socketService.onUpdate().subscribe(data => {
+      if(data.content){
+        this.messages = JSON.parse(data.content) || [];
+      }
     });
 
 
-    this.socketService.onLoadingRoom().subscribe(data=>{
-      this.history = data;
-  });
-
-
-    this.socketService.onUpdate().subscribe(data=>{
-        this.messages = data.mess;
-        console.log(data.mess);
-    });
-
-
-    this.socketService.onJoin().subscribe(data=>{
-        console.log(data);
+    this.socketService.onJoin().subscribe(data => {
+      console.log(data);
     });
 
     this.socketService.onEvent(Event.CONNECT)
@@ -147,8 +158,8 @@ export class ChatComponent implements OnInit, AfterViewInit {
         return;
       }
 
-      this.user.name = "thinh"+this.user.id;
-      this.room = paramsDialog.username;
+      this.user.name = "thinh" + this.user.id;
+      // this.room = paramsDialog.username;
       if (paramsDialog.dialogType === DialogUserType.NEW) {
         this.initIoConnection();
         this.sendNotification(paramsDialog, Action.JOINED);
@@ -164,7 +175,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     }
 
     this.socketService.send({
-      room:this.room,
+      room_id: this.room_id,
       from: this.user,
       content: message
     });
@@ -174,12 +185,15 @@ export class ChatComponent implements OnInit, AfterViewInit {
   public sendNotification(params: any, action: Action): void {
     let message: any;
 
-      message = {
-        room:this.room,
-        from: this.user,
-        action: action
-      }
+    message = {
+      room_id: this.room_id,
+      from: this.user,
+      action: action
+    }
 
     this.socketService.send(message);
+  }
+  public goToHome(){
+    this.router.navigate(['home']);
   }
 }

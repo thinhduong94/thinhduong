@@ -3,8 +3,22 @@ import { Injectable, Output, EventEmitter } from '@angular/core';
 @Injectable()
 export class AppChatEventService {
   @Output() getDataUserChat: EventEmitter<any> = new EventEmitter();
+  @Output() getIsShow: EventEmitter<any> = new EventEmitter();
+  @Output() getisLoading: EventEmitter<any> = new EventEmitter();
   getUserChat:any;
   getUserName:any;
-  constructor() { }
+  // getUser:any;
+  getRoom:any;
+  getRoomInfo:any;
+  isShow:boolean = false;
+  constructor() { 
 
+  }
+
+  getUser(){
+    return  JSON.parse(localStorage.getItem("user"));
+  }
+  clearUser(){
+    localStorage.removeItem("user");
+  }
 }

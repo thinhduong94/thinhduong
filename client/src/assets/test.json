@@ -1,0 +1,22 @@
+[
+    {
+        "room_id": "room_3",
+        "user_id": "user_1"
+    },
+    {
+        "room_id": "room_3",
+        "user_id": "user_2"
+    },
+    {
+        "room_id": "room_4",
+        "user_id": {
+            "userName": "con_heo",
+            "name": "con heo",
+            "id": "user_1"
+        }
+    },
+    {
+        "room_id": "room_4",
+        "user_id": "user_2"
+    }
+]

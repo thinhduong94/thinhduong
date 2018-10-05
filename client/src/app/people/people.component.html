@@ -1,0 +1,32 @@
+
+<div>
+    <mat-toolbar color="primary">
+      <button mat-icon-button>
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>Typescript Chat</span>
+    </mat-toolbar>
+  </div>
+<mat-card>
+  <form class="example-form">
+    <mat-form-field class="example-full-width">
+      <input type="text" placeholder="Assignee" [(ngModel)]="name" name="name" aria-label="Assignee" (keyup.enter)="addList()"  matInput [formControl]="myControl" [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+          {{option.name}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </form>
+</mat-card>
+<mat-card>
+  <mat-list>
+    <mat-list-item *ngFor="let item of users"> 
+        <mat-icon matListIcon>folder</mat-icon>
+        <h4 matLine>{{item.name}}</h4>
+        <p matLine class="demo-2"> Online </p>  
+        <button mat-raised-button color="primary" *ngIf="item.click==true" (click)="addF(item)">Add</button>
+        <button mat-raised-button color="primary" *ngIf="item.click==false" disabled (click)="addF(item)">Added</button>
+    </mat-list-item>
+   </mat-list>
+</mat-card>

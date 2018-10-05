@@ -1,0 +1,37 @@
+<div>
+    <mat-toolbar color="primary">
+      <button mat-icon-button>
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>Typescript Chat</span>
+    </mat-toolbar>
+  </div>
+<mat-card>
+  <mat-card-content>
+    <form class="example-form">
+      <mat-form-field class="example-full-width">
+        <input type="text" placeholder="Group name" [(ngModel)]="name" name="name" aria-label="Assignee" matInput [formControl]="myControl">
+      </mat-form-field>
+    </form>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-raised-button  color="primary" class="add_room" (click)="addRoom()">Add</button>
+  </mat-card-actions>
+</mat-card>
+<mat-card class="user_list">
+  <mat-card-header>
+    User List
+  </mat-card-header>
+  <mat-card-content>
+  <mat-list>
+      <mat-list-item *ngFor="let item of users">
+        <mat-icon matListIcon>folder</mat-icon>
+        <h4 matLine>{{item.info.name}}</h4>
+        <p matLine class="demo-2"> Online </p>
+        <button mat-raised-button color="primary" *ngIf="item.click==true" (click)="addPeople(item)">Add</button>
+        <button mat-raised-button color="primary" *ngIf="item.click==false" disabled (click)="addPeople(item)">Added</button>
+      </mat-list-item>
+
+  </mat-list>
+  </mat-card-content>
+</mat-card>
