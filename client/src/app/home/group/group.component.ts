@@ -19,9 +19,9 @@ export class GroupComponent implements OnInit {
   }
   ngAfterViewInit(){
   }
-  private chat(user):void{
-    this.event.getRoom = user.id;
-    this.event.getRoomInfo = user;
+  private chat(room):void{
+    this.event.getRoom = room.id;
+    this.event.getRoomInfo = room;
     this.router.navigate(['chat']); 
   }
 }

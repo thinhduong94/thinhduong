@@ -18,6 +18,9 @@ import { PeopleComponent } from './people/people.component';
 import { SocketService } from 'app/chat/shared/services/socket.service';
 import { GroupComponent } from './group/group.component';
 import { ProfileComponent } from './profile/profile.component';
+import { HttpClientModule } from '@angular/common/http';
+import { userService } from 'app/service/userService';
+import { roomService } from 'app/service/roomService';
 
 @NgModule({
   declarations: [
@@ -37,9 +40,10 @@ import { ProfileComponent } from './profile/profile.component';
     ChatModule,
     SharedModule,
     HomeModule,
-    LoginModule
+    LoginModule,
+    HttpClientModule
   ],
-  providers: [AppComponent,AppChatEventService,SocketService],
+  providers: [AppComponent,AppChatEventService,SocketService,userService,roomService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

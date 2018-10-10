@@ -4,19 +4,19 @@
         <mat-icon>menu</mat-icon>
       </button>
       <span *ngIf="room.type=='room'">{{room.name}}</span>
-      <span *ngIf="room.type=='private'">{{room.info.name}}</span>
+      <span *ngIf="room.type=='private'">{{room.name}}</span>
     </mat-toolbar>
   </div>
 <div class="chat-container">
   <mat-card class="main-card">
-    <mat-list class="chat-list">
-      <mat-list-item class="list-item padding0" *ngFor="let message of messages; let i = index" >
+    <mat-list class="chat-list" #scrollMe>
+      <mat-list-item class="padding0" *ngFor="let message of messages; let i = index" [ngClass]="[(message.action === undefined && message.from.id === user.id)? 'list-item-end': 'list-item-start']" >
         <!-- <img mat-list-avatar *ngIf="message.action === undefined && message.from.id !== user.id" [src]="message.from.avatar"> -->
         <p mat-line *ngIf="room.type=='room' && message.from.id !== user.id && messages[i-1] && messages[i-1].from.id != message.from.id">
            {{message.from.name}}
         </p>
         <div mat-line  [ngClass]="[(message.action === undefined && message.from.id === user.id)? 'chat-list-item': 'chat-list-item-1']" >
-          <p mat-line *ngIf="message.action === undefined">
+          <p mat-line style="margin: 10px;" *ngIf="message.action === undefined">
              {{message.content}}
           </p>
         </div>

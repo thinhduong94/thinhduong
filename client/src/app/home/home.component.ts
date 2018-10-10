@@ -6,7 +6,10 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AppChatEventService } from 'app/app-chat-event.service';
 import { SocketService } from 'app/chat/shared/services/socket.service';
 import { Subscription } from 'rxjs';
-
+import { roomService } from 'app/service/roomService';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/Rx';
+import { userService } from 'app/service/userService';
 @Component({
   selector: 'tcc-home',
   templateUrl: './home.component.html',
@@ -34,6 +37,8 @@ export class HomeComponent implements OnInit {
   isLoading: boolean;
   constructor(private event: AppChatEventService,
     private socketService: SocketService,
+    private roomSv: roomService,
+    private userSv: userService,
     public dialog: MatDialog,
     public snackBar: MatSnackBar,
     private router: Router, private route: ActivatedRoute) {
@@ -45,70 +50,155 @@ export class HomeComponent implements OnInit {
     if (!this.user) {
       this.router.navigate(['login']);
     }
+
+    this.loadData();
     this.socketService.initSocket();
-    this.socketService.getHistories(this.user.id);
-    this.socketService.getFriend(this.user.id);
-    this.socketService.getRoom(this.user.id);
-    this.getNotification = this.socketService.onGetNotification().subscribe(data => {
-      console.log(data);
-      let index = data.to.findIndex(x => x == this.user.id);
+    this.getNotification = this.socketService.onGetNotification().subscribe(rs => {
+      let index = rs.data.findIndex(x => x == this.user.id);
       if (index > -1) {
-
-        if (data.type == "addRoom") {
-          this.socketService.getRoom(this.user.id);
-        }
-        if (data.type == "addFriend") {
-          this.socketService.getFriend(this.user.id);
-        }
-        if (data.type == "addMess") {
-          this.socketService.getHistories(this.user.id);
-        }
-
-        let message = data.from.name + " : " + data.content;
+        let message = "You have a new message :3";
+        this.loadData();
         this.snackBar.open(message, "", {
           duration: 2000,
           verticalPosition: 'top',
           horizontalPosition: 'center'
         });
       }
+      console.log(rs.data);
+    })
+    // this.socketService.getHistories(this.user.id);
+    // this.socketService.getFriend(this.user.id);
+    // this.socketService.getRoom(this.user.id);
+    // this.getNotification = this.socketService.onGetNotification().subscribe(data => {
+    //   console.log(data);
+    //   let index = data.to.findIndex(x => x == this.user.id);
+    //   if (index > -1) {
+
+    //     if (data.type == "addRoom") {
+    //       this.socketService.getRoom(this.user.id);
+    //     }
+    //     if (data.type == "addFriend") {
+    //       this.socketService.getFriend(this.user.id);
+    //     }
+    //     if (data.type == "addMess") {
+    //       this.socketService.getHistories(this.user.id);
+    //     }
+
+    //     let message = data.from.name + " : " + data.content;
+    //     this.snackBar.open(message, "", {
+    //       duration: 2000,
+    //       verticalPosition: 'top',
+    //       horizontalPosition: 'center'
+    //     });
+    //   }
+    // })
+  }
+
+  loadData() {
+    Observable.forkJoin([
+      this.roomSv.getFriendUser(this.user.id),
+      this.roomSv.getGruopUser(this.user.id),
+      this.roomSv.getHistories(this.user.id),
+      this.userSv.getAllUser()
+    ]).subscribe((results: any[]) => {
+      this.users = results[0] || [];
+
+      this.users = this.users.map(val => ({
+        id: val.room_id,
+        user_id: val.id,
+        name: val.name,
+        type: val.type,
+        content: val.content
+      }));
+
+      this.rooms = results[1] || [];
+      this.histories = results[2] || [];
+
+
+      this.histories.forEach(x => {
+
+        if (x.type == "private") {
+          let user = "";
+          let user1 = x.name.split("/")[0];
+          let user2 = x.name.split("/")[1];
+          if (user1 == this.user.id) {
+            user = user2;
+          }
+          if (user2 == this.user.id) {
+            user = user1;
+          }
+
+          let index = results[3].findIndex(y => y.id == user);
+
+          let userinfo = results[3][index];
+
+          x.name = userinfo.name;
+
+        }
+
+
+        if (x.content.length > 0) {
+          let array = JSON.parse(x.content);
+          x.lasterMess = array[array.length - 1];
+        }
+      })
+
+
+      this.histories = this.histories.map(val => ({
+        id: val.room_id,
+        name: val.name,
+        type: val.type,
+        content: val.content,
+        lasterMess: val.lasterMess
+      }));
+
+      this.rooms = this.rooms.map(val => ({
+        id: val.room_id,
+        name: val.name,
+        type: val.type,
+        content: val.content
+      }));
+      console.log(results);
+      this.isLoading = false;
+      this.event.getisLoading.emit(this.isLoading);
     })
   }
 
   ngOnInit() {
-  
+
 
 
     // this.socketService.notification(user.id);
-    this.getRoom = this.socketService.onGetRoom().subscribe(data => {
-      this.rooms = data;
-      console.log(data);
-    })
-    // openSnackBar(message: string, action: string) {
-    //   this.snackBar.open(message, action, {
-    //     duration: 2000,
-    //   });
-    // }
+    // this.getRoom = this.socketService.onGetRoom().subscribe(data => {
+    //   this.rooms = data;
+    //   console.log(data);
+    // })
+    // // openSnackBar(message: string, action: string) {
+    // //   this.snackBar.open(message, action, {
+    // //     duration: 2000,
+    // //   });
+    // // }
 
-    this.getHistories = this.socketService.onGetHistories().subscribe(data => {
-      this.histories = data;
-      console.log(data);
-      this.isLoading = false;
-      this.event.getisLoading.emit(this.isLoading);
-    })
+    // this.getHistories = this.socketService.onGetHistories().subscribe(data => {
+    //   this.histories = data;
+    //   console.log(data);
+    //   this.isLoading = false;
+    // this.event.getisLoading.emit(this.isLoading);
+    // })
 
 
 
-    this.getFriend = this.socketService.onGetFriend().subscribe(data => {
-      this.users = data;
-      console.log(data);
-    })
+    // this.getFriend = this.socketService.onGetFriend().subscribe(data => {
+    //   this.users = data;
+    //   console.log(data);
+    // })
     this.event.getIsShow.emit(this.IsShow);
   }
   ngOnDestroy() {
-    this.getNotification.unsubscribe();
-    this.getFriend.unsubscribe();
-    this.getRoom.unsubscribe();
-    this.getHistories.unsubscribe();
+    // this.getNotification.unsubscribe();
+    // this.getFriend.unsubscribe();
+    // this.getRoom.unsubscribe();
+    // this.getHistories.unsubscribe();
   }
   // private openUserPopup(params): void {
   //   this.dialogRef = this.dialog.open(DialogUserComponent, params);

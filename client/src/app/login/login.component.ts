@@ -7,6 +7,9 @@ import { AppChatEventService } from 'app/app-chat-event.service';
 import { SocketService } from 'app/chat/shared/services/socket.service';
 import { Subscribable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs';
+import { userService } from 'app/service/userService';
+import { User } from 'app/model/user';
+
 
 @Component({
   selector: 'tcc-login',
@@ -15,6 +18,8 @@ import { Subscription } from 'rxjs';
 })
 export class LoginComponent implements OnInit {
   dialogRef: MatDialogRef<DialogUserComponent> | null;
+  islogin:boolean = false;
+  isregister:boolean = false;
   defaultDialogUserParams: any = {
     disableClose: true,
     data: {
@@ -22,62 +27,77 @@ export class LoginComponent implements OnInit {
       dialogType: DialogUserType.NEW
     }
   };
-
+  userLogin: any = {
+    username: '',
+    password: ''
+  };
+  userRegister: any = {
+    username: '',
+    password: '',
+    name: ''
+  }
   isLoading: boolean = false;
-  constructor(private router: Router, public dialog: MatDialog, private event: AppChatEventService,
+  constructor(private router: Router,
+    private usersv: userService,
+    public dialog: MatDialog, private event: AppChatEventService,
     private socketService: SocketService,
   ) {
     this.event.getisLoading.emit(this.isLoading);
 
   }
-  username: string;
-  password: string;
+
 
   onLogin: Subscription;
 
   onGetUserInfo: Subscription;
 
   ngOnInit() {
-    this.socketService.initSocket();
-    this.onLogin = this.socketService.onLogin().subscribe(data => {
-      this.onGetUserInfo = this.socketService.onGetUserInfo().subscribe(user => {
+    // this.socketService.initSocket();
+    // this.onLogin = this.socketService.onLogin().subscribe(data => {
+    //   this.onGetUserInfo = this.socketService.onGetUserInfo().subscribe(user => {
+    //     localStorage.setItem("user", JSON.stringify(user));
+    //     this.router.navigate(['home']);
+    //   });
+    // });
+
+    // setTimeout(() => {
+    //   this.openUserPopup(this.defaultDialogUserParams);
+    // }, 0);
+  }
+  register() {
+    let user = new User();
+
+    user.userName = this.userRegister.username;
+    user.passWord = this.userRegister.password;
+    user.name = this.userRegister.name;
+
+    this.usersv.register(user).subscribe(data=>{
+      if(data){
+        user.id = data.data.insertId
         localStorage.setItem("user", JSON.stringify(user));
         this.router.navigate(['home']);
-      });
-    });
+        console.log(data);
+      }else{
+        this.isregister = true;
+      }
+     
+    })
 
-    setTimeout(() => {
-      this.openUserPopup(this.defaultDialogUserParams);
-    }, 0);
   }
   login(): void {
-    if (this.username == 'admin' && this.password == 'admin') {
-      
-      this.router.navigate(["home"]);
-    } else {
-      alert("Invalid credentials");
-    }
-  }
-  private openUserPopup(params): void {
-    this.isLoading = true;
-    this.event.getisLoading.emit(this.isLoading);
-    this.dialogRef = this.dialog.open(DialogUserComponent, params);
-    this.dialogRef.afterClosed().subscribe(paramsDialog => {
-      if (!paramsDialog) {
-        return;
+    this.usersv.login(this.userLogin.username,this.userLogin.password).subscribe(data=>{
+      if(data["data"].length > 0){
+        localStorage.setItem("user", JSON.stringify(data["data"][0]));
+        this.router.navigate(['home']);
+      }else{
+        this.islogin = true;
       }
-      this.event.getUserName = paramsDialog.username;
-
-      let user = {
-        userName: paramsDialog.username,
-        name: paramsDialog.name,
-      }
-
-      this.socketService.login(user);
-    });
+    })
+  
   }
+  
   ngOnDestroy() {
-    this.onLogin.unsubscribe();
-    this.onGetUserInfo.unsubscribe();
+    // this.onLogin.unsubscribe();
+    // this.onGetUserInfo.unsubscribe();
   }
 }

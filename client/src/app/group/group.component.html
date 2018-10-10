@@ -24,9 +24,9 @@
   </mat-card-header>
   <mat-card-content>
   <mat-list>
-      <mat-list-item *ngFor="let item of users">
+      <mat-list-item *ngFor="let item of friends">
         <mat-icon matListIcon>folder</mat-icon>
-        <h4 matLine>{{item.info.name}}</h4>
+        <h4 matLine>{{item.name}}</h4>
         <p matLine class="demo-2"> Online </p>
         <button mat-raised-button color="primary" *ngIf="item.click==true" (click)="addPeople(item)">Add</button>
         <button mat-raised-button color="primary" *ngIf="item.click==false" disabled (click)="addPeople(item)">Added</button>

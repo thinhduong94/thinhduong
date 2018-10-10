@@ -1,7 +1,7 @@
 <mat-list>
   <mat-list-item *ngFor="let item of histories"  (click)="chat(item)"> 
       <mat-icon matListIcon>history</mat-icon>
-      <h4 matLine *ngIf="item.type=='private'">{{item.info.name}}</h4>
+      <h4 matLine *ngIf="item.type=='private'">{{item.name}}</h4>
       <h4 matLine *ngIf="item.type=='room'">{{item.name}}</h4>
       <p matLine class="demo-2" *ngIf="item.lasterMess">{{item.lasterMess.from.name ? item.lasterMess.from.name : ""}} : {{item.lasterMess ? item.lasterMess.content:""}} </p>
       <p matLine class="demo-2" *ngIf="!item.lasterMess">Say something</p>    

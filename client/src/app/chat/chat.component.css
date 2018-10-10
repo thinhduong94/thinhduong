@@ -24,7 +24,8 @@
     padding: 0 !important;
 }
 .chat-list {
-    overflow: auto;
+    
+    overflow-y: auto;
     position: fixed;
     top: 70px;
     left: 25px;
@@ -84,4 +85,12 @@ mat-list-item{
 
 .chat-notification {
     text-align: center;
+}
+.list-item-end{
+    display: flex;
+    justify-content: flex-end;
+}
+.list-item-start{
+    display: flex;
+    justify-content: flex-start;
 }

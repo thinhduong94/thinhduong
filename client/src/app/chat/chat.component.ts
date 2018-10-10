@@ -11,8 +11,10 @@ import { DialogUserType } from './dialog-user/dialog-user-type';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscriber } from 'rxjs/Subscriber';
 import { AppChatEventService } from 'app/app-chat-event.service';
+import { roomService } from 'app/service/roomService';
 
-
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/Rx';
 const AVATAR_URL = 'https://api.adorable.io/avatars/285';
 
 @Component({
@@ -28,11 +30,12 @@ export class ChatComponent implements OnInit, AfterViewInit {
   messageContent: string;
   ioConnection: any;
   room_id: any = "";
-  room:any;
+  room: any;
   user: any = "";
   toUser: any = "";
   history: any[] = [];
-  IsShow:boolean=false;
+  details: any[] = [];
+  IsShow: boolean = false;
   dialogRef: MatDialogRef<DialogUserComponent> | null;
   defaultDialogUserParams: any = {
     disableClose: true,
@@ -44,7 +47,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
   private getDataUserChat: Subscriber<any>;
   // getting a reference to the overall list, which is the parent container of the list items
   @ViewChild(MatList, { read: ElementRef }) matList: ElementRef;
-
+  // @ViewChild('scrollMe') private myScrollContainer: ElementRef;
   // getting a reference to the items/messages within the list
   @ViewChildren(MatListItem, { read: ElementRef }) matListItems: QueryList<MatListItem>;
 
@@ -52,23 +55,43 @@ export class ChatComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog,
     private route: ActivatedRoute,
     private event: AppChatEventService,
-    private router: Router
+    private router: Router,
+    private roomSv: roomService,
 
   ) {
     this.user = this.event.getUser();
-    if(!this.user){
+    if (!this.user) {
       this.router.navigate(['login']);
     }
-    this.room =  this.event.getRoomInfo;
-   }
+    this.room = this.event.getRoomInfo;
+    Observable.forkJoin([
+      this.roomSv.getRoomById(this.room.id),
+      this.roomSv.getDetailByRoomId(this.room.id)
+    ]).subscribe((results: any[]) => {
+
+      if (results[0][0].content.length > 0) {
+        let array = JSON.parse(this.room.content);
+        this.messages = array;
+      }
+      results[1].forEach(d => {
+        if (d.user_id != this.user.id) {
+          this.details.push(d.user_id);
+        }
+      });
+
+    })
+
+
+
+  }
 
   ngOnInit(): void {
-    
+
     this.event.getIsShow.emit(this.IsShow);
     this.initModel();
-  
+
     this.room_id = this.event.getRoom || "defual";
-   
+    this.scrollToBottom();
     this.initIoConnection();
   }
   ngOnDestroy(): void {
@@ -80,15 +103,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
       this.scrollToBottom();
     });
   }
+  ngAfterViewChecked() {
+    this.scrollToBottom();
+  }
 
-  // auto-scroll fix: inspired by this stack overflow post
-  // https://stackoverflow.com/questions/35232731/angular2-scroll-to-bottom-chat-style
   private scrollToBottom(): void {
     try {
       this.matList.nativeElement.scrollTop = this.matList.nativeElement.scrollHeight;
-    } catch (err) {
-    }
+    } catch (err) { }
   }
+  // auto-scroll fix: inspired by this stack overflow post
+  // https://stackoverflow.com/questions/35232731/angular2-scroll-to-bottom-chat-style
 
   private initModel(): void {
     // const randomId = this.getRandomId();
@@ -107,6 +132,10 @@ export class ChatComponent implements OnInit, AfterViewInit {
       .subscribe((message: any) => {
         console.log(this.messages);
         this.messages.push(message);
+        this.scrollToBottom();
+        this.roomSv.updateRoomContent(this.room.id, this.messages).subscribe(data => {
+          console.log("hi vong mong manh");
+        })
       });
 
 
@@ -115,11 +144,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
     // });
 
 
-    this.socketService.onUpdate().subscribe(data => {
-      if(data.content){
-        this.messages = JSON.parse(data.content) || [];
-      }
-    });
+    // this.socketService.onUpdate().subscribe(data => {
+    //   if(data.content){
+    //     this.messages = JSON.parse(data.content) || [];
+    //   }
+    // });
 
 
     this.socketService.onJoin().subscribe(data => {
@@ -170,15 +199,17 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   public sendMessage(message: string): void {
+    console.log(this.details);
     if (!message) {
       return;
     }
-
     this.socketService.send({
       room_id: this.room_id,
+      details: this.details,
       from: this.user,
       content: message
     });
+    
     this.messageContent = null;
   }
 
@@ -193,7 +224,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
     this.socketService.send(message);
   }
-  public goToHome(){
+  public goToHome() {
     this.router.navigate(['home']);
   }
 }

@@ -9,6 +9,7 @@ import { HistoriesComponent } from 'app/home/histories/histories.component';
 import { GroupComponent } from 'app/home/group/group.component';
 import { LoginComponent } from 'app/login/login.component';
 import { DialogUserComponent } from 'app/login/dialog-login/dialog-user.component';
+import { userService } from 'app/service/userService';
 
 
 @NgModule({
@@ -20,7 +21,7 @@ import { DialogUserComponent } from 'app/login/dialog-login/dialog-user.componen
     MaterialModule,
   ],
   declarations:  [DialogUserComponent,LoginComponent],
-  providers: [SocketService],
+  providers: [SocketService,userService],
   entryComponents: [DialogUserComponent,LoginComponent]
 })
 export class LoginModule { }

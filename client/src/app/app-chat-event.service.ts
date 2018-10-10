@@ -16,7 +16,9 @@ export class AppChatEventService {
   }
 
   getUser(){
-    return  JSON.parse(localStorage.getItem("user"));
+    let user = JSON.parse(localStorage.getItem("user"))
+    console.log(user);
+    return  user;
   }
   clearUser(){
     localStorage.removeItem("user");
