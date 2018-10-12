@@ -9,13 +9,14 @@ import { Router } from '@angular/router';
 })
 export class ProfileComponent implements OnInit {
 
-  constructor(private event:AppChatEventService, private router: Router) { }
+  main: any = {};
+  constructor(private event: AppChatEventService, private router: Router) { }
 
   ngOnInit() {
-
+    this.main = this.event.getUser();
 
   }
-  logOut(){
+  logOut() {
 
     this.event.clearUser();
     this.router.navigate(['login']);

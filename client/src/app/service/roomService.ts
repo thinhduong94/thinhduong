@@ -29,5 +29,8 @@ export class roomService {
     getDetailByRoomId(id:string):Observable<any>  {
         return this.http.get<any>(API+'getDetailByRoomId?id='+id);
     }
+    getUserbyRoomId(id:string):Observable<any>  {
+        return this.http.get<any>(API+'getUserbyRoomId?id='+id);
+    }
     
 }

@@ -1,1 +1,29 @@
-<button mat-raised-button  color="primary" class="add_room" (click)="logOut()">Add</button>
+<div>
+    <mat-toolbar color="primary">
+        <button mat-icon-button>
+            <mat-icon>settings</mat-icon>
+        </button>
+        <span>profile</span>
+    </mat-toolbar>
+</div>
+<div>
+    <table class="content-profile">
+        <tr>
+            <td rowspan="2" class="avata">
+                <div class="avata-centent">
+                    <span>
+                            {{main.name[0]}}
+                    </span>
+                  
+                </div>
+            </td>
+            <td>Account</td>
+            <td>{{main.userName}}</td>
+        </tr>
+        <tr>
+            <td>Name</td>
+            <td>{{main.name}}</td>
+        </tr>
+    </table>
+    <button mat-raised-button color="primary" class="add_room" (click)="logOut()">LogOut</button>
+</div>

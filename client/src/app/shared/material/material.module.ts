@@ -16,7 +16,8 @@ import {
   MatTabNav,
   MatAutocompleteModule,
   MatProgressBarModule,
-  MatSnackBarModule, 
+  MatSnackBarModule,
+  MatGridListModule, 
 } from '@angular/material';
 
 @NgModule({
@@ -40,7 +41,8 @@ import {
    MatAutocompleteModule,
    MatProgressSpinnerModule,
    MatProgressBarModule,
-   MatSnackBarModule
+   MatSnackBarModule,
+   MatGridListModule
   ],
   exports: [
     MatButtonModule, 
@@ -56,7 +58,8 @@ import {
     MatProgressSpinnerModule,
     MatAutocompleteModule,
     MatProgressBarModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatGridListModule
   ],
   declarations: [],
   providers: [

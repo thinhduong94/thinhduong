@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
     password: '',
     name: ''
   }
-  isLoading: boolean = false;
+  isLoading: boolean ;
   constructor(private router: Router,
     private usersv: userService,
     public dialog: MatDialog, private event: AppChatEventService,
@@ -70,8 +70,10 @@ export class LoginComponent implements OnInit {
     user.userName = this.userRegister.username;
     user.passWord = this.userRegister.password;
     user.name = this.userRegister.name;
-
-    this.usersv.register(user).subscribe(data=>{
+    this.isLoading = true;
+    this.usersv.register(user)
+    .finally(()=>this.isLoading = false)
+    .subscribe(data=>{
       if(data){
         user.id = data.data.insertId
         localStorage.setItem("user", JSON.stringify(user));

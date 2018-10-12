@@ -1,13 +1,15 @@
 <div>
   <mat-toolbar color="primary">
     <button mat-icon-button>
-      <mat-icon>menu</mat-icon>
+      <mat-icon>home</mat-icon>
     </button>
-    <span>Typescript Chat</span>
+    <span>Home</span>
   </mat-toolbar>
 </div>
+<mat-progress-bar *ngIf="isLoding" mode="indeterminate"></mat-progress-bar>
 <div>
-  <mat-tab-group mat-stretch-tabs>
+  <mat-tab-group mat-stretch-tabs class="tab-body">
+  
     <mat-tab label="History">
       <tcc-histories [histories]="histories"></tcc-histories>
     </mat-tab>

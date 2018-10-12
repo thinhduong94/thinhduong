@@ -1,3 +1,54 @@
 .login{
-    margin-top: 100px;
+    margin-top: 50px;
+    min-width: 80%;
+    background-color: #ffffffe0
+}
+.example-full-width{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.main-login{
+    display: flex;
+    justify-content: center;
+}
+.header-login{
+    display: flex;
+    /* text-align: center; */
+    justify-content: center;
+}
+.card-content{
+    margin-top:20px; 
+}
+.logo-login{
+    background: coral;
+    border-radius: 100%;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 30px;
+    display: table-cell;
+    vertical-align: middle;
+    color: white;
+}
+.main{
+    height: -webkit-fill-available;
+    /* background: #edeff8; */
+}
+.error{
+    text-align: center;
+    color: red;
+    font-weight: 500;
+}
+.fooder-login{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 200px;
+    background: red;
+    background-image: url("/assets/img/Tho_Bay_Mau_sd.JPG");
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    background-size: cover; /* Resize the background image to cover the entire container */
 }

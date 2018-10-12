@@ -95,12 +95,15 @@ export class HomeComponent implements OnInit {
   }
 
   loadData() {
+    this.isLoading = true;
     Observable.forkJoin([
       this.roomSv.getFriendUser(this.user.id),
       this.roomSv.getGruopUser(this.user.id),
       this.roomSv.getHistories(this.user.id),
       this.userSv.getAllUser()
-    ]).subscribe((results: any[]) => {
+    ])
+    .finally(()=>this.isLoading=false)
+    .subscribe((results: any[]) => {
       this.users = results[0] || [];
 
       this.users = this.users.map(val => ({
@@ -156,6 +159,7 @@ export class HomeComponent implements OnInit {
         id: val.room_id,
         name: val.name,
         type: val.type,
+        user_id:val.user_Created,
         content: val.content
       }));
       console.log(results);

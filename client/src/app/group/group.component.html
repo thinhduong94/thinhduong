@@ -1,13 +1,15 @@
 <div>
     <mat-toolbar color="primary">
       <button mat-icon-button>
-        <mat-icon>menu</mat-icon>
+        <mat-icon>person</mat-icon>
       </button>
-      <span>Typescript Chat</span>
+      <span>Group</span>
+     
     </mat-toolbar>
   </div>
 <mat-card>
   <mat-card-content>
+    <mat-progress-bar *ngIf="isLoding"  mode="indeterminate"></mat-progress-bar>
     <form class="example-form">
       <mat-form-field class="example-full-width">
         <input type="text" placeholder="Group name" [(ngModel)]="name" name="name" aria-label="Assignee" matInput [formControl]="myControl">
@@ -20,12 +22,16 @@
 </mat-card>
 <mat-card class="user_list">
   <mat-card-header>
-    User List
+   
+    <button mat-icon-button (click)="refresh()">
+        User List
+        <mat-icon> refresh</mat-icon>
+    </button>
   </mat-card-header>
   <mat-card-content>
   <mat-list>
       <mat-list-item *ngFor="let item of friends">
-        <mat-icon matListIcon>folder</mat-icon>
+        <mat-icon matListIcon>person</mat-icon>
         <h4 matLine>{{item.name}}</h4>
         <p matLine class="demo-2"> Online </p>
         <button mat-raised-button color="primary" *ngIf="item.click==true" (click)="addPeople(item)">Add</button>

@@ -11,6 +11,9 @@
     margin: 5px;
   }
   mat-list{
-    max-height: 350px;
+    max-height: 400px;
     overflow: scroll;
   }
+.example-full-width{
+  width: 100%;
+}

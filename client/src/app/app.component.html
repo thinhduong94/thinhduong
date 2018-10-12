@@ -1,8 +1,5 @@
 <div>
   <!-- (click)="sidenav.toggle()" -->
-  <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
-
-  
   <router-outlet> </router-outlet>
   <div class="footer" *ngIf="isShow">
     <nav mat-tab-nav-bar mat-stretch-tabs [backgroundColor]="background" class="demo-tab-group" style="text-align: center;">

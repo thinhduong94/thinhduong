@@ -1,70 +1,85 @@
-<mat-card class="login">
-    <mat-card-header>
-        <mat-card-title >
-           <p *ngIf="islogin">Maybe you wrong username or password</p>
-           <p *ngIf="isregister">Maybe you wrong username, password or name</p>
-        </mat-card-title>
-        
-    </mat-card-header>
-    <mat-tab-group>
-        <mat-tab label="login">
-            <mat-card-content>
-                <form name="login" class="example-form">
-                    <table class="example-full-width" cellspacing="0">
-                        <tr>
-                            <td>
-                                <mat-form-field class="example-full-width">
-                                    <input matInput placeholder="Username" [(ngModel)]="userLogin.username" name="userLogin.username" required>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <mat-form-field class="example-full-width">
-                                    <input matInput placeholder="Password" [(ngModel)]="userLogin.password" type="password" name="userLogin.password" required>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-                <mat-spinner [style.display]="showSpinner ? 'block' : 'none'"></mat-spinner>
-            </mat-card-content>
-            <mat-card-actions>
-                <button mat-raised-button (click)="login()" color="primary">Login</button>
-            </mat-card-actions>
-        </mat-tab>
-        <mat-tab label="register">
-            <mat-card-content>
-                <form name="register" class="example-form">
-                    <table class="example-full-width" cellspacing="0">
-                        <tr>
-                            <td>
-                                <mat-form-field class="example-full-width">
-                                    <input matInput placeholder="Username" [(ngModel)]="userRegister.username" name="userRegister.username" required>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <mat-form-field class="example-full-width">
-                                    <input matInput placeholder="Password" [(ngModel)]="userRegister.password" type="password" name="userRegister.password" required>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <mat-form-field class="example-full-width">
-                                    <input matInput placeholder="Name" [(ngModel)]="userRegister.name" type="name" name="userRegister.name" required>
-                                </mat-form-field>
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-                <mat-spinner [style.display]="showSpinner ? 'block' : 'none'"></mat-spinner>
-            </mat-card-content>
-            <mat-card-actions>
-                <button mat-raised-button (click)="register()" color="primary">Register</button>
-            </mat-card-actions>
-        </mat-tab>
-    </mat-tab-group>
-</mat-card>
+<div class="main">
+    <div class="main-login"> 
+           
+        <div class="login">
+               
+            <div class="header-login">
+                <div class="logo-login">
+                    <p>T</p>
+                </div>
+            </div>
+           
+            <div class="card-content">
+                <div class="error">
+                        <mat-progress-bar *ngIf="isLoding"  mode="indeterminate"></mat-progress-bar>
+                        <p *ngIf="islogin">* Maybe you wrong username or password</p>
+                        <p *ngIf="isregister">* Maybe you wrong username, password or name</p>
+                </div>
+                <mat-tab-group mat-stretch-tabs>
+                    <mat-tab label="Login">
+                        <form name="login" class="example-form">
+                            <table class="example-full-width" cellspacing="0">
+                                <tr>
+                                    <td>
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput placeholder="Username" [(ngModel)]="userLogin.username" name="userLogin.username" required>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput placeholder="Password" [(ngModel)]="userLogin.password" type="password" name="userLogin.password" required>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                        <mat-spinner [style.display]="showSpinner ? 'block' : 'none'"></mat-spinner>
+
+
+                        <button class="example-full-width" mat-raised-button (click)="login()" color="primary">Login</button>
+
+                    </mat-tab>
+                    <mat-tab label="Register">
+
+                        <form name="register" class="example-form">
+                            <table class="example-full-width" cellspacing="0">
+                                <tr>
+                                    <td>
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput placeholder="Username" [(ngModel)]="userRegister.username" name="userRegister.username" required>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput placeholder="Password" [(ngModel)]="userRegister.password" type="password" name="userRegister.password" required>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <mat-form-field class="example-full-width">
+                                            <input matInput placeholder="Name" [(ngModel)]="userRegister.name" type="name" name="userRegister.name" required>
+                                        </mat-form-field>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                        <mat-spinner [style.display]="showSpinner ? 'block' : 'none'"></mat-spinner>
+
+
+                        <button class="example-full-width" mat-raised-button (click)="register()" color="primary">Register</button>
+
+                    </mat-tab>
+                </mat-tab-group>
+            </div>
+        </div>
+      
+    </div>
+    <div class="fooder-login">
+
+    </div>
+</div>

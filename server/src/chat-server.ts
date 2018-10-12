@@ -134,6 +134,15 @@ export class ChatServer {
             });
 
         });
+
+        this.app.get('/getUserbyRoomId', (req, res) => {
+            res.header("Access-Control-Allow-Origin", "*");
+            let id = req.query.id;
+            let a = this.roomSv.getUserbyRoomId(id,function (err, Result) {
+                res.send(Result);
+            });
+
+        });
         
         this.app.get('/getDetailByRoomId', (req, res) => {
             res.header("Access-Control-Allow-Origin", "*");

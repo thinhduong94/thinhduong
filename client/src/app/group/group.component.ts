@@ -25,6 +25,7 @@ export class GroupComponent implements OnInit {
   user: any = {};
   rs: any[] = [];
   listUserInRoom: any[] = [];
+  isLoding:boolean;
   constructor(private socketService: SocketService,
     private event: AppChatEventService,
     public snackBar: MatSnackBar,
@@ -39,16 +40,8 @@ export class GroupComponent implements OnInit {
     this.socketService.initSocket();
 
 
-    this.roomSv.getFriendUser(this.user.id).subscribe(data=>{
-      this.friends = data || [];
-      this.friends = this.friends.map(val => ({
-        id: val.user_id,
-        name: val.name,
-        userName: val.userName,
-        click: true
-      }));
-    })
-
+    
+    this.loadData();
   
 
   }
@@ -65,8 +58,16 @@ export class GroupComponent implements OnInit {
     _room.user_friend = null;
     _room.user_created = this.user.id;
     _room.type = 'room';
-
-    this.roomSv.createRoom(_room).subscribe(data => {
+    this.isLoding =true;
+    this.roomSv.createRoom(_room)
+    .finally(()=>this.isLoding = false)
+    .subscribe(data => {
+      let message = "Room have been create :3"
+      this.snackBar.open(message, "", {
+        duration: 2000,
+        verticalPosition: 'top',
+        horizontalPosition: 'center'
+      });
       console.log("create");
     });
 
@@ -78,6 +79,25 @@ export class GroupComponent implements OnInit {
       if (u.id == user.id) {
         u.click = false;
       }
+    })
+  }
+  private refresh(){
+    
+    this.loadData();
+  }
+
+  private loadData(){
+    this.isLoding =true;
+    this.roomSv.getFriendUser(this.user.id)
+    .finally(()=>this.isLoding = false)
+    .subscribe(data=>{
+      this.friends = data || [];
+      this.friends = this.friends.map(val => ({
+        id: val.user_id,
+        name: val.name,
+        userName: val.userName,
+        click: true
+      }));
     })
   }
   ngOnDestroy() {

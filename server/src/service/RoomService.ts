@@ -70,4 +70,12 @@ export class roomService {
             callback(err, Result)
         });
     }
+    public getUserbyRoomId(id:string,callback){
+        console.log(JSON.stringify(id));
+        this.db.getUserbyRoomId(id, function (err, Result) {
+            //you might want to do something is err is not null... 
+            callback(err, Result)
+        });
+    }
+    
 }

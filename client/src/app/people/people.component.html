@@ -1,32 +1,39 @@
-
 <div>
-    <mat-toolbar color="primary">
-      <button mat-icon-button>
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>Typescript Chat</span>
-    </mat-toolbar>
-  </div>
+  <mat-toolbar color="primary">
+    <button mat-icon-button>
+      <mat-icon>people</mat-icon>
+    </button>
+    <span>People</span>
+  </mat-toolbar>
+</div>
 <mat-card>
-  <form class="example-form">
-    <mat-form-field class="example-full-width">
-      <input type="text" placeholder="Assignee" [(ngModel)]="name" name="name" aria-label="Assignee" (keyup.enter)="addList()"  matInput [formControl]="myControl" [matAutocomplete]="auto">
-      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-        <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-          {{option.name}}
-        </mat-option>
-      </mat-autocomplete>
+  <mat-progress-bar *ngIf="isLoding" mode="indeterminate"></mat-progress-bar>
+  <mat-form-field class="example-full-width">
+      <input matInput 
+             #inputMessage 
+             maxlength="140" 
+             placeholder="Search" 
+             [(ngModel)]="keyWord"
+             (keyup)="search(keyWord)">
+      <!-- <mat-hint align="end">{{inputMessage.value.length}}/140</mat-hint> -->
     </mat-form-field>
-  </form>
 </mat-card>
 <mat-card>
-  <mat-list>
-    <mat-list-item *ngFor="let item of rs"> 
-        <mat-icon matListIcon>folder</mat-icon>
+  <mat-card-header>
+    <button mat-icon-button (click)="refresh()">
+      User List
+      <mat-icon> refresh</mat-icon>
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-list>
+      <mat-list-item *ngFor="let item of rs">
+        <mat-icon matListIcon>person</mat-icon>
         <h4 matLine>{{item.name}}</h4>
-        <p matLine class="demo-2"> Online </p>  
+        <p matLine class="demo-2"> Online </p>
         <button mat-raised-button color="primary" *ngIf="item.click==true" (click)="addF(item)">Add</button>
         <button mat-raised-button color="primary" *ngIf="item.click==false" disabled (click)="addF(item)">Added</button>
-    </mat-list-item>
-   </mat-list>
+      </mat-list-item>
+    </mat-list>
+  </mat-card-content>
 </mat-card>

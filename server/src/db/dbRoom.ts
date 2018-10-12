@@ -45,6 +45,15 @@ export class dbRoom {
             callback(err, rows);
         });
     }
+    public getUserbyRoomId(id:string,callback){
+        let sql = "SELECT * FROM user , detailroom WHERE user.id =detailroom.user_id and detailroom.room_id ="+id+"";
+        console.log(sql);
+        this.con.query(sql, function (err, rows) {
+            //here we return the results of the query
+            callback(err, rows);
+        });
+    }
+
     public getRoomIsFriendById(id: string, callback) {
         let sql = "SELECT * FROM room , detailroom, user WHERE room.id = detailroom.room_id AND (room.user_Created = " + id + " OR room.user_Friend = " + id + ") AND detailroom.user_id != " + id + " AND room.type = 'private' AND user.id = detailroom.user_id";
         console.log(sql);
