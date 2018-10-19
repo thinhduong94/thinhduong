@@ -24,13 +24,24 @@ export class roomService {
         return this.http.get<any>(API+'getHistories?id='+id);
     }
     updateRoomContent(id:string,content:any):Observable<any>  {
-        return this.http.post<any>(API+'updateRoomContent?id='+id,JSON.stringify(content));
+        return this.http.put<any>(API+'updateRoomContent?id='+id,JSON.stringify(content));
     }
     getDetailByRoomId(id:string):Observable<any>  {
         return this.http.get<any>(API+'getDetailByRoomId?id='+id);
     }
+    deleteNumberInRoom(id:string,user_id:string):Observable<any>  {
+        return this.http.post<any>(API+'deleteNumberInRoom?id='+id,JSON.stringify({user_id:user_id}));
+    }
+    updateRoom(id:string,name:string):Observable<any>  {
+
+        return this.http.post<any>(API+'updateRoom?id='+id,JSON.stringify({name:name}));
+    }
     getUserbyRoomId(id:string):Observable<any>  {
         return this.http.get<any>(API+'getUserbyRoomId?id='+id);
+    }
+
+    deleteRoom(id:string):Observable<any>  {
+        return this.http.delete(API+'deleteRoom?id='+id);
     }
     
 }

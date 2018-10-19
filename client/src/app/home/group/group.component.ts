@@ -5,6 +5,7 @@ import { SocketService } from 'app/chat/shared/services/socket.service';
 import { MatDialogRef, MatDialog } from '@angular/material';
 import { DialogUserComponent } from 'app/home/dialog-user/dialog-user.component';
 import { DialogUserType } from 'app/home/dialog-user/dialog-user-type';
+import { roomService } from 'app/service/roomService';
 
 @Component({
   selector: 'tcc-group',
@@ -13,6 +14,7 @@ import { DialogUserType } from 'app/home/dialog-user/dialog-user-type';
 })
 export class GroupComponent implements OnInit {
   @Input() rooms: any[] = [];
+  user:any = {};
   dialogRef: MatDialogRef<DialogUserComponent> | null;
   defaultDialogUserParams: any = {
     disableClose: true,
@@ -22,15 +24,16 @@ export class GroupComponent implements OnInit {
     }
   };
   constructor(private router: Router,
+    private roomSv: roomService,
     public dialog: MatDialog,
-    private event:AppChatEventService,
-     ) { }
+    private event: AppChatEventService,
+  ) { }
   ngOnInit() {
-    
+    this.user = this.event.getUser();
     console.log(this.rooms);
     console.log("PeopleComponent");
   }
-  ngAfterViewInit(){
+  ngAfterViewInit() {
   }
 
   private openUserPopup(params): void {
@@ -39,6 +42,24 @@ export class GroupComponent implements OnInit {
       if (!paramsDialog) {
         return;
       }
+
+      if (paramsDialog.oldName !== paramsDialog.newName) {
+        this.roomSv.updateRoom(paramsDialog.id, paramsDialog.newName)
+          .subscribe(data => {
+            console.log("update");
+            this.roomSv.getGruopUser(this.user.id).subscribe(group => {
+              this.rooms = group.map(val => ({
+                id: val.room_id,
+                name: val.name,
+                type: val.type,
+                user_id: val.user_Created,
+                content: val.content
+              }));
+            })
+          });
+      }
+
+
     });
   }
   public onClickUserInfo(room) {
@@ -50,9 +71,9 @@ export class GroupComponent implements OnInit {
       }
     });
   }
-  private chat(room):void{
+  private chat(room): void {
     this.event.getRoom = room.id;
     this.event.getRoomInfo = room;
-    this.router.navigate(['chat']); 
+    this.router.navigate(['chat']);
   }
 }

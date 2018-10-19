@@ -30,4 +30,11 @@ export class dbUser {
             callback(err, rows);
         });
     }
+    public updateUserById(id:string,status:boolean,callback){
+        var sql = "UPDATE user SET user.status = " + status + " WHERE user.id = " + id + "";
+        console.log(sql);
+        this.con.query(sql, function (err, result) {
+            callback(err, result);
+        });
+    }
 }

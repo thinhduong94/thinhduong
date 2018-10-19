@@ -3,8 +3,8 @@
         <mat-icon matListIcon>group</mat-icon>
         <h4 matLine (click)="chat(room)">{{room.name}}</h4>
         <p matLine class="demo-2"> Online </p>  
-        <button mat-raised-button color="primary" (click)="onClickUserInfo(room)">
-            Edit
+        <button mat-raised-button color="primary" mat-icon-button (click)="onClickUserInfo(room)">
+            <mat-icon >edit</mat-icon>   
         </button>
     </mat-list-item>
   

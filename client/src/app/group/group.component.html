@@ -1,15 +1,17 @@
 <div>
-    <mat-toolbar color="primary">
-      <button mat-icon-button>
-        <mat-icon>person</mat-icon>
-      </button>
-      <span>Group</span>
-     
-    </mat-toolbar>
-  </div>
+  <mat-toolbar color="primary">
+    <button mat-icon-button>
+      <mat-icon>person</mat-icon>
+    </button>
+    <span class="example-fill-remaining-space">Group</span>
+    <button mat-icon-button (click)="refresh()">
+      <mat-icon> refresh</mat-icon>
+    </button>
+  </mat-toolbar>
+</div>
 <mat-card>
   <mat-card-content>
-    <mat-progress-bar *ngIf="isLoding"  mode="indeterminate"></mat-progress-bar>
+    <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
     <form class="example-form">
       <mat-form-field class="example-full-width">
         <input type="text" placeholder="Group name" [(ngModel)]="name" name="name" aria-label="Assignee" matInput [formControl]="myControl">
@@ -17,27 +19,27 @@
     </form>
   </mat-card-content>
   <mat-card-actions>
-    <button mat-raised-button  color="primary" class="add_room" (click)="addRoom()">Add</button>
+    <button mat-raised-button color="primary" class="add_room" (click)="addRoom()">Add</button>
   </mat-card-actions>
 </mat-card>
 <mat-card class="user_list">
   <mat-card-header>
-   
-    <button mat-icon-button (click)="refresh()">
-        User List
-        <mat-icon> refresh</mat-icon>
-    </button>
+    <mat-card-title> User List</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-  <mat-list>
+    <mat-list>
       <mat-list-item *ngFor="let item of friends">
         <mat-icon matListIcon>person</mat-icon>
         <h4 matLine>{{item.name}}</h4>
         <p matLine class="demo-2"> Online </p>
-        <button mat-raised-button color="primary" *ngIf="item.click==true" (click)="addPeople(item)">Add</button>
-        <button mat-raised-button color="primary" *ngIf="item.click==false" disabled (click)="addPeople(item)">Added</button>
+        <button mat-raised-button mat-icon-button color="primary" *ngIf="item.click==true" (click)="addPeople(item)">
+            <mat-icon>group_add</mat-icon> 
+        </button>
+        <button mat-raised-button color="primary" mat-icon-button *ngIf="item.click==false" disabled (click)="addPeople(item)">
+            <mat-icon>group_add</mat-icon> 
+        </button>
       </mat-list-item>
 
-  </mat-list>
+    </mat-list>
   </mat-card-content>
 </mat-card>

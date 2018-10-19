@@ -18,8 +18,8 @@ import { User } from 'app/model/user';
 })
 export class LoginComponent implements OnInit {
   dialogRef: MatDialogRef<DialogUserComponent> | null;
-  islogin:boolean = false;
-  isregister:boolean = false;
+  islogin: boolean = false;
+  isregister: boolean = false;
   defaultDialogUserParams: any = {
     disableClose: true,
     data: {
@@ -36,7 +36,7 @@ export class LoginComponent implements OnInit {
     password: '',
     name: ''
   }
-  isLoading: boolean ;
+  isLoading: boolean;
   constructor(private router: Router,
     private usersv: userService,
     public dialog: MatDialog, private event: AppChatEventService,
@@ -52,17 +52,16 @@ export class LoginComponent implements OnInit {
   onGetUserInfo: Subscription;
 
   ngOnInit() {
-    // this.socketService.initSocket();
-    // this.onLogin = this.socketService.onLogin().subscribe(data => {
-    //   this.onGetUserInfo = this.socketService.onGetUserInfo().subscribe(user => {
-    //     localStorage.setItem("user", JSON.stringify(user));
-    //     this.router.navigate(['home']);
-    //   });
-    // });
+    this.socketService.initSocket();
+    this.onLogin = this.socketService.onLogin().finally(() => this.isLoading = false).subscribe(data => {
+      if (data["data"].length > 0) {
+        localStorage.setItem("user", JSON.stringify(data["data"][0]));
+        this.router.navigate(['home']);
+      } else {
+        this.islogin = true;
+      }
+    });
 
-    // setTimeout(() => {
-    //   this.openUserPopup(this.defaultDialogUserParams);
-    // }, 0);
   }
   register() {
     let user = new User();
@@ -72,32 +71,34 @@ export class LoginComponent implements OnInit {
     user.name = this.userRegister.name;
     this.isLoading = true;
     this.usersv.register(user)
-    .finally(()=>this.isLoading = false)
-    .subscribe(data=>{
-      if(data){
-        user.id = data.data.insertId
-        localStorage.setItem("user", JSON.stringify(user));
-        this.router.navigate(['home']);
-        console.log(data);
-      }else{
-        this.isregister = true;
-      }
-     
-    })
+      .finally(() => this.isLoading = false)
+      .subscribe(data => {
+        if (data) {
+          user.id = data.data.insertId
+          // localStorage.setItem("user", JSON.stringify(user));
+          // this.router.navigate(['home']);
+          console.log(data);
+        } else {
+          this.isregister = true;
+        }
+
+      })
 
   }
   login(): void {
-    this.usersv.login(this.userLogin.username,this.userLogin.password).subscribe(data=>{
-      if(data["data"].length > 0){
-        localStorage.setItem("user", JSON.stringify(data["data"][0]));
-        this.router.navigate(['home']);
-      }else{
-        this.islogin = true;
-      }
-    })
-  
+    this.isLoading = true;
+    this.socketService.login({userName:this.userLogin.username,passWord:this.userLogin.password});
+    // this.usersv.login(this.userLogin.username, this.userLogin.password).subscribe(data => {
+    //   if (data["data"].length > 0) {
+    //     localStorage.setItem("user", JSON.stringify(data["data"][0]));
+    //     this.router.navigate(['home']);
+    //   } else {
+    //     this.islogin = true;
+    //   }
+    // })
+
   }
-  
+
   ngOnDestroy() {
     // this.onLogin.unsubscribe();
     // this.onGetUserInfo.unsubscribe();

@@ -8,7 +8,9 @@ import { SocketService } from 'app/chat/shared/services/socket.service';
 import { Subscription } from 'rxjs';
 import { roomService } from 'app/service/roomService';
 import { Observable } from 'rxjs/Observable';
+import * as moment from 'moment';
 import 'rxjs/Rx';
+import * as _ from 'lodash';
 import { userService } from 'app/service/userService';
 @Component({
   selector: 'tcc-home',
@@ -102,70 +104,78 @@ export class HomeComponent implements OnInit {
       this.roomSv.getHistories(this.user.id),
       this.userSv.getAllUser()
     ])
-    .finally(()=>this.isLoading=false)
-    .subscribe((results: any[]) => {
-      this.users = results[0] || [];
+      .finally(() => this.isLoading = false)
+      .subscribe((results: any[]) => {
+        this.users = results[0] || [];
 
-      this.users = this.users.map(val => ({
-        id: val.room_id,
-        user_id: val.id,
-        name: val.name,
-        type: val.type,
-        content: val.content
-      }));
+        this.users = this.users.map(val => ({
+          id: val.room_id,
+          user_id: val.id,
+          name: val.name,
+          type: val.type,
+          content: val.content,
+          status: val.status
+        }));
 
-      this.rooms = results[1] || [];
-      this.histories = results[2] || [];
+        this.rooms = results[1] || [];
+        this.histories = results[2] || [];
 
 
-      this.histories.forEach(x => {
+        this.histories.forEach(x => {
 
-        if (x.type == "private") {
-          let user = "";
-          let user1 = x.name.split("/")[0];
-          let user2 = x.name.split("/")[1];
-          if (user1 == this.user.id) {
-            user = user2;
+          if (x.type == "private") {
+            let user = "";
+            let user1 = x.name.split("/")[0];
+            let user2 = x.name.split("/")[1];
+            if (user1 == this.user.id) {
+              user = user2;
+            }
+            if (user2 == this.user.id) {
+              user = user1;
+            }
+
+            let index = results[3].findIndex(y => y.id == user);
+
+            let userinfo = results[3][index];
+
+            x.name = userinfo.name;
+
           }
-          if (user2 == this.user.id) {
-            user = user1;
+
+
+          if (x.content.length > 0) {
+            let array = x.content == "" ? [] : JSON.parse(x.content);
+            x.lasterMess = array[array.length - 1];
           }
-
-          let index = results[3].findIndex(y => y.id == user);
-
-          let userinfo = results[3][index];
-
-          x.name = userinfo.name;
-
-        }
+        })
 
 
-        if (x.content.length > 0) {
-          let array = JSON.parse(x.content);
-          x.lasterMess = array[array.length - 1];
-        }
+        this.histories = this.histories.map(val => ({
+          id: val.room_id,
+          name: val.name,
+          type: val.type,
+          content: val.content,
+          lasterMess: val.lasterMess
+        }));
+
+        this.histories = _.orderBy(this.histories, function (o) {
+
+          return moment(o.lasterMess ? o.lasterMess.date : Date.now());
+        }, ['desc']);
+
+
+
+        this.rooms = this.rooms.map(val => ({
+          id: val.room_id,
+          name: val.name,
+          type: val.type,
+          user_id: val.user_Created,
+          content: val.content
+        }));
+        console.log(results);
+        this.isLoading = false;
+        this.event.getisLoading.emit(this.isLoading);
       })
-
-
-      this.histories = this.histories.map(val => ({
-        id: val.room_id,
-        name: val.name,
-        type: val.type,
-        content: val.content,
-        lasterMess: val.lasterMess
-      }));
-
-      this.rooms = this.rooms.map(val => ({
-        id: val.room_id,
-        name: val.name,
-        type: val.type,
-        user_id:val.user_Created,
-        content: val.content
-      }));
-      console.log(results);
-      this.isLoading = false;
-      this.event.getisLoading.emit(this.isLoading);
-    })
   }
 
   ngOnInit() {
@@ -192,10 +202,35 @@ export class HomeComponent implements OnInit {
 
 
 
-    // this.getFriend = this.socketService.onGetFriend().subscribe(data => {
-    //   this.users = data;
-    //   console.log(data);
-    // })
+    this.socketService.isOnline().subscribe(data => {
+      console.log(data);
+      this.users.forEach(x => {
+        if (x.user_id == data.id) {
+          x.status = true;
+          let message = data.name +" Online :3";
+          this.snackBar.open(message, "", {
+            duration: 2000,
+            verticalPosition: 'top',
+            horizontalPosition: 'center'
+          });
+        }
+      })
+    })
+
+    this.socketService.islogOut().subscribe(data => {
+      console.log(data);
+      this.users.forEach(x => {
+        if (x.user_id == data.id) {
+          x.status = false;
+          let message = data.name +" Offline :3";
+          this.snackBar.open(message, "", {
+            duration: 2000,
+            verticalPosition: 'top',
+            horizontalPosition: 'center'
+          });
+        }
+      })
+    })
     this.event.getIsShow.emit(this.IsShow);
   }
   ngOnDestroy() {

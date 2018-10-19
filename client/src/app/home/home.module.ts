@@ -17,7 +17,7 @@ import { DialogUserComponent } from 'app/home/dialog-user/dialog-user.component'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MaterialModule
+    MaterialModule 
   ],
   declarations:  [DialogUserComponent,HomeComponent,PeopleComponent,HistoriesComponent,GroupComponent],
   providers: [SocketService,roomService],

@@ -94,3 +94,79 @@ mat-list-item{
     display: flex;
     justify-content: flex-start;
 }
+/* 
+::ng-deep .blue{ */
+    /* background: red !important; */
+    /* position: unset !important;
+} */
+/* ::ng-deep .blue .search-header{ */
+    /* background: red !important; */
+    /* padding:0 !important;
+} */
+
+/* ::ng-deep .red{ */
+    /* background: red !important; */
+    /* display: none !important; */
+    /* width: 100% !important; */
+/* } 
+::ng-deep emoji-input{
+    width: 100% !important;
+} */
+
+:host {
+    display: block;
+    position: relative;
+  }
+  :host .emoji-search {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
+    height: auto;
+    line-height: 1.5;
+    /* position: absolute; */
+    right: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+  }
+  :host .emoji-search[hidden] {
+    display: none;
+  }
+  :host .emoji-search.bottom {
+    top: -202px;
+  }
+  :host .emoji-search input {
+    border-radius: 4px;
+    font-size: 10px;
+    /* padding: 4px 8px; */
+    margin: 0;
+    height: 30px;
+  }
+  :host .emoji-search .search-header {
+    background-color: #eee;
+    border-bottom: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+    /* padding: 4px 8px; */
+    width: 100%;
+  }
+  :host .emoji-search .emojis-container {
+    border-radius: 0 0 4px 4px;
+    max-height: 160px;
+    padding: 5px 12px;
+    overflow: auto;
+    overflow-x: hidden;
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  :host .emoji-search span {
+    cursor: pointer;
+    padding: 4px 3px 2px 4px;
+    font-size: 24px;
+  }
+  :host .emoji-search span:hover {
+    background-color: #ccc;
+  }

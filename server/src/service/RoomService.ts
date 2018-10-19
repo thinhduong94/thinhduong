@@ -42,8 +42,17 @@ export class roomService {
     }
     public updateRoomContent(id,content,callback){
         // console.log(JSON.stringify(room));
-        this.db.updateRoomContent(id,content, function (err, Result,callback) {
+        this.db.updateRoomContent(id,content, function (err, Result) {
             console.log(Result);
+            callback(err, Result);
+            //you might want to do something is err is not null... 
+        });
+    }
+
+    public addMessage(data:any,callback){
+        this.db.addMessage(data, function (err, Result) {
+            console.log(Result);
+            callback(err, Result);
             //you might want to do something is err is not null... 
         });
     }
@@ -70,9 +79,30 @@ export class roomService {
             callback(err, Result)
         });
     }
+    public updateRoom(id:string,name:string,callback){
+        console.log(JSON.stringify(id));
+        this.db.updateRoom(id,name, function (err, Result) {
+            //you might want to do something is err is not null... 
+            callback(err, Result)
+        });
+    }
     public getUserbyRoomId(id:string,callback){
         console.log(JSON.stringify(id));
         this.db.getUserbyRoomId(id, function (err, Result) {
+            //you might want to do something is err is not null... 
+            callback(err, Result)
+        });
+    }
+    public deleteNumberInRoom(id:string,user_id:string,callback){
+        console.log(JSON.stringify(id));
+        this.db.deleteNumberInRoom(id,user_id, function (err, Result) {
+            //you might want to do something is err is not null... 
+            callback(err, Result)
+        });
+    }
+    public deleteRoom(id:string,callback){
+        console.log(JSON.stringify(id));
+        this.db.deleteRoom(id, function (err, Result) {
             //you might want to do something is err is not null... 
             callback(err, Result)
         });

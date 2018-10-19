@@ -68,7 +68,17 @@ export class ChatServer {
     private sockets(): void {
         this.io = socketIo(this.server);
     }
-
+    pushChat(length) {
+        console.log(this.messages.length);
+        if (length > 0) {
+            console.log(this.messages[0]);
+            this.roomSv.updateRoomContent(this.messages[0].id, this.messages[0].contents, (err, Result) => {
+                this.messages.shift();
+                let length = this.messages.length;
+                this.pushChat(length);
+            });
+        }
+    }
     private listen(): void {
         this.server.listen(this.port, () => {
             console.log('Running server on port %s', this.port);
@@ -80,77 +90,160 @@ export class ChatServer {
 
             // console.log('socket', socket);
 
+
             console.log('socket.id', socket.id);
 
             // this.io.sockets
 
-            console.log('sockets', JSON.stringify([]));
 
+            socket.on('login', (data: any) => {
+                let a = this.userSv.login(data.userName, data.passWord, (err, Result) => {
+                    //     res.send(Result);
+                    // });
+                    let rs: boolean = false;
 
-            
-
-            socket.on('join', (data: any) => {
-
-           
-                socket.join(data);
-            
-                socket.broadcast.to(data).emit('join', data);
-      
+                    if (Result.length > 0) {
+                        rs = true;
+                        let id = Result[0].id
+                        let name = Result[0].name
+                        this.userSv.updateUserById(Result[0].id, true, (err, Result) => {
+                            this.io.emit('isOnline', { id: id, name: name });
+                        })
+                    }
+                    console.log(Result.length);
+                    socket.emit('login', { data: Result });
+                    // res.send({ "data": Result });
+                });
             })
 
+            socket.on('logOut', (data: any) => {
+                let a = this.userSv.login(data.userName, data.passWord, (err, Result) => {
+                    //     res.send(Result);
+                    // });
+                    let rs: boolean = false;
+
+                    if (Result.length > 0) {
+                        rs = true;
+                        let id = Result[0].id
+                        let name = Result[0].name
+                        this.userSv.updateUserById(Result[0].id, false , (err, Result) => {
+                            this.io.emit('islogOut', { id: id, name: name });
+                        })
+                    }
+                    console.log(Result.length);
+                    socket.emit('logOut', { data: Result });
+                    // res.send({ "data": Result });
+                });
+            })
+
+            console.log('sockets', JSON.stringify([]));
+            socket.on('join', (data: any) => {
+                socket.join(data);
+                socket.broadcast.to(data).emit('join', data);
+            })
             socket.on('loadingRoom', (data: any) => {
                 console.log("-----loadingRoom-----");
                 let rs: any[] = [];
-            
-
                 console.log("loadingRoom" + JSON.stringify(rs));
-
                 socket.emit('loadingRoom', rs);
             })
-
             socket.on('message', (m: any) => {
+                console.log("messages:" + JSON.stringify(m));
 
-                console.log("notification:" + JSON.stringify(m.details));
+                this.io.emit('notification', { data: m.details });
 
-                this.io.emit('notification',{data:m.details});
-                
-                console.log("messages:" + JSON.stringify(this.messages));
-                console.log('[server](message): %s', JSON.stringify(m));
-                this.io.to(m.room_id).emit('message', m);
+                this.roomSv.getRoomById(m.room_id, (req, res) => {
+                    console.log(JSON.stringify(res));
+                    let contents: any[] = res[0].content == "" ? [] : JSON.parse(res[0].content);
+                    m.date = Date.now();
+                    contents.push(m);
+                    JSON.stringify(contents)
+                    console.log("contents:" + JSON.stringify(contents));
+                    this.roomSv.updateRoomContent(m.room_id, contents, (req, res) => {
+                        socket.broadcast.to(m.room_id).emit('message', m);
+                        socket.emit('sended', m);
+                    });
+
+                })
+
+
             });
-
-
             socket.on('disconnect', () => {
                 console.log('Client disconnected');
             });
+
         });
 
-
-        this.app.get('/getRoomById', (req, res) => {
+        this.app.use((req, res, next) => {
             res.header("Access-Control-Allow-Origin", "*");
+            res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            next();
+        });
+        this.app.post('/deleteNumberInRoom', (req, res) => {
+            res.header("Access-Control-Allow-Origin", "*");
+            if (req.method === 'POST') {
+                let body = '';
+                let id = req.query.id;
+                req.on('data', chunk => {
+                    body += chunk.toString(); // convert Buffer to string
+                });
+                req.on('end', () => {
+                    let user = JSON.parse(body);
+                    let user_id = user.user_id;
+                    let a = this.roomSv.deleteNumberInRoom(id, user_id, function (err, Result) {
+                        res.send(Result);
+                    });
+                });
+            }
+        });
+        this.app.post('/updateRoom', (req, res) => {
+            res.header("Access-Control-Allow-Origin", "*");
+            if (req.method === 'POST') {
+                let body = '';
+                let id = req.query.id;
+                req.on('data', chunk => {
+
+                    body += chunk.toString(); // convert Buffer to string
+                });
+                req.on('end', () => {
+                    let room = JSON.parse(body);
+                    let name = room.name;
+                    let a = this.roomSv.updateRoom(id, name, function (err, Result) {
+                        res.send(Result);
+                    });
+                });
+            }
+        });
+        this.app.get('/getRoomById', (req, res) => {
+            req.header('Access-Control-Allow-Origin: *');
+            req.header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+            req.header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
             let id = req.query.id;
-            let a = this.roomSv.getRoomById(id,function (err, Result) {
+            let a = this.roomSv.getRoomById(id, function (err, Result) {
                 res.send(Result);
             });
-
         });
+        this.app.delete('/deleteRoom', (req, res) => {
 
+            let id = req.query.id;
+            let a = this.roomSv.deleteRoom(id, function (err, Result) {
+                res.send(Result);
+            });
+        });
         this.app.get('/getUserbyRoomId', (req, res) => {
             res.header("Access-Control-Allow-Origin", "*");
             let id = req.query.id;
-            let a = this.roomSv.getUserbyRoomId(id,function (err, Result) {
+            let a = this.roomSv.getUserbyRoomId(id, function (err, Result) {
                 res.send(Result);
             });
-
         });
-        
         this.app.get('/getDetailByRoomId', (req, res) => {
             res.header("Access-Control-Allow-Origin", "*");
             let id = req.query.id;
-            let a = this.roomSv.getDetailByRoomId(id,function (err, Result) {
+            let a = this.roomSv.getDetailByRoomId(id, function (err, Result) {
                 res.send(Result);
             });
-
         });
         this.app.get('/getAllUser', (req, res) => {
             res.header("Access-Control-Allow-Origin", "*");
@@ -159,24 +252,24 @@ export class ChatServer {
             });
 
         });
-        this.app.get('/getHistories',(req, res)=>{
+        this.app.get('/getHistories', (req, res) => {
             res.header("Access-Control-Allow-Origin", "*");
             let id = req.query.id;
-            this.roomSv.getHistories(id,function (err, Result) {
+            this.roomSv.getHistories(id, function (err, Result) {
                 res.send(Result);
             });
         })
         this.app.get('/getFriendUser', (req, res) => {
             res.header("Access-Control-Allow-Origin", "*");
             let id = req.query.id;
-            let a = this.roomSv.getRoomIsFriendById(id,function (err, Result) {
+            let a = this.roomSv.getRoomIsFriendById(id, function (err, Result) {
                 res.send(Result);
             });
         });
         this.app.get('/getGruopUser', (req, res) => {
             res.header("Access-Control-Allow-Origin", "*");
             let id = req.query.id;
-            let a = this.roomSv.getRoomIsGroupById(id,function (err, Result) {
+            let a = this.roomSv.getRoomIsGroupById(id, function (err, Result) {
                 res.send(Result);
             });
         });
@@ -193,13 +286,13 @@ export class ChatServer {
                     let a = this.userSv.login(user.userName, user.passWord, function (err, Result) {
                         //     res.send(Result);
                         // });
-                        let rs:boolean = false;
-                      
-                        if(Result.length > 0){
-                           rs = true;
+                        let rs: boolean = false;
+
+                        if (Result.length > 0) {
+                            rs = true;
                         }
                         console.log(Result.length);
-                        res.send({"data":Result});
+                        res.send({ "data": Result });
                     });
                 });
             }
@@ -222,15 +315,15 @@ export class ChatServer {
                     user.name = _user.name;
 
                     let a = this.userSv.register(user, function (err, Result) {
-                        res.send({"data":Result});
+                        res.send({ "data": Result });
                     });
                 });
             }
         });
-        this.app.post('/updateRoomContent', (req, res) => {
-            res.header('Access-Control-Allow-Origin', '*'); 
+        this.app.put('/updateRoomContent', (req, res) => {
+            res.header('Access-Control-Allow-Origin', '*');
             console.log(req.method);
-            if (req.method === 'POST') {
+            if (req.method === 'PUT') {
                 let id = req.query.id;
                 let body = '';
                 req.on('data', chunk => {
@@ -239,8 +332,8 @@ export class ChatServer {
                 });
                 req.on('end', () => {
                     let content = JSON.parse(body);
-                    let a = this.roomSv.updateRoomContent(id,content, function (err, Result) { 
-                        res.send({"data":Result});
+                    let a = this.roomSv.updateRoomContent(id, content, function (err, Result) {
+                        res.send({ "data": Result });
                     });
                 });
             }
@@ -267,14 +360,11 @@ export class ChatServer {
                     room.type = _room.type;
 
                     let a = this.roomSv.createRoom(room, function (err, Result) {
-                        res.send({"data":Result});
+                        res.send({ "data": Result });
                     });
                 });
             }
         });
-        // this.app.post('/register',function (req, res) {
-        //     res.send(JSON.stringify(req)); 
-        // })
     }
     public getApp(): express.Application {
         return this.app;

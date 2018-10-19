@@ -1,6 +1,8 @@
 .add_room{
     width: 100%;
-    margin-top: 50px;
+    /* margin-top: 50px; */
+    position: absolute;
+    bottom: 51px;
   }
   .content-profile{
     width: 100%;
@@ -20,4 +22,9 @@
     display: table-cell;
     border: 3px solid;
     font-size: 40px;
+  }
+  .example-fill-remaining-space {
+    /* This fills the remaining space, by using flexbox. 
+       Every toolbar row uses a flexbox row layout. */
+    flex: 1 1 auto;
   }

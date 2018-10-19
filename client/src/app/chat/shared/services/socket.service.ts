@@ -22,53 +22,77 @@ export class SocketService {
         this.socket.emit('message', message);
     }
 
-    public notification(id:string){
-        this.socket.emit('notification',id);
+    public notification(id: string) {
+        this.socket.emit('notification', id);
     }
 
-    public join(data:any):void{
-        this.socket.emit('join',data);
+    public join(data: any): void {
+        this.socket.emit('join', data);
     }
 
-    public leave(data:any):void{
-        this.socket.emit('leave',data);
-    }
-    
-    public getHistories(id:string){
-        this.socket.emit('getHistoyies',id);
-    }
-    
-    public loadingRoom(data:any){
-        this.socket.emit('loadingRoom',data);
+    public leave(data: any): void {
+        this.socket.emit('leave', data);
     }
 
-    public login(data:any){
-        this.socket.emit('login',data);
+    public getHistories(id: string) {
+        this.socket.emit('getHistoyies', id);
     }
 
-    public getAllUser(id:string){
-        this.socket.emit('getAllUser',id);
+    public loadingRoom(data: any) {
+        this.socket.emit('loadingRoom', data);
     }
 
-    public getFriend(id:string){   
-        this.socket.emit('getFriend',id);
+    public login(data: any) {
+        this.socket.emit('login', data);
+    }
+    public logOut(data: any) {
+        this.socket.emit('logOut', data);
     }
 
-    public addFriend(data:any){
-        this.socket.emit('addFriend',data);
+    public getAllUser(id: string) {
+        this.socket.emit('getAllUser', id);
     }
 
-    public createRoom(data:any){
-        this.socket.emit('createRoom',data);
+    public getFriend(id: string) {
+        this.socket.emit('getFriend', id);
     }
 
-    public getRoom(id:string){
-        this.socket.emit('getRoom',id);
+    public addFriend(data: any) {
+        this.socket.emit('addFriend', data);
     }
-    
+
+    public createRoom(data: any) {
+        this.socket.emit('createRoom', data);
+    }
+
+    public getRoom(id: string) {
+        this.socket.emit('getRoom', id);
+    }
+
+    public islogOut(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('islogOut', (data: any) => observer.next(data));
+        });
+    }
+
+    public onlogOut(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('logOut', (data: any) => observer.next(data));
+        });
+    }
     public onGetNotification(): Observable<any> {
         return new Observable<any>(observer => {
             this.socket.on('notification', (data: any) => observer.next(data));
+        });
+    }
+    public sended(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('sended', (data: any) => observer.next(data));
+        });
+    }
+    public isOnline(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('isOnline', (data: any) => observer.next(data));
         });
     }
     public onGetHistories(): Observable<any> {
@@ -94,7 +118,7 @@ export class SocketService {
             this.socket.on('getFriend', (data: any) => observer.next(data));
         });
     }
-  
+
     public onAddFriend(): Observable<any> {
         return new Observable<any>(observer => {
             this.socket.on('addFriend', (data: any) => observer.next(data));

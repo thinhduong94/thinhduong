@@ -8,16 +8,19 @@ import { ChatComponent } from './chat.component';
 import { SocketService } from './shared/services/socket.service';
 import { DialogUserComponent } from './dialog-user/dialog-user.component';
 import { roomService } from 'app/service/roomService';
+import {EmojiPickerModule} from 'ng-emoji-picker';
+import { EmojiService } from 'app/shared/emojiCustomize/emojiSevice';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MaterialModule
+    MaterialModule,
+    EmojiPickerModule,
   ],
   declarations: [ChatComponent, DialogUserComponent],
-  providers: [SocketService,roomService],
+  providers: [SocketService,roomService,EmojiService],
   entryComponents: [DialogUserComponent]
-})
+})  
 export class ChatModule { }

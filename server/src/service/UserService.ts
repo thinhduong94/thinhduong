@@ -23,6 +23,13 @@ export class userService {
         let user = new User();
         return user;
     }
+    public updateUserById(id:string,status:boolean,callback){
+        this.db.updateUserById(id, status, function (err, Result) {
+            //you might want to do something is err is not null...      
+            callback(err, Result)
+
+        });
+    }
     public login(userName: string, passWord: string, callback) {
         console.log(userName+'/'+passWord);
         this.db.login(userName, passWord, function (err, Result) {

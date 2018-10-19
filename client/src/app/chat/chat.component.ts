@@ -15,6 +15,8 @@ import { roomService } from 'app/service/roomService';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
+import { FormGroup } from '@angular/forms';
+import { EmojiService } from 'app/shared/emojiCustomize/emojiSevice';
 const AVATAR_URL = 'https://api.adorable.io/avatars/285';
 
 @Component({
@@ -26,8 +28,10 @@ export class ChatComponent implements OnInit, AfterViewInit {
   getUserChat: any;
   action = Action;
   // user: User;
-  messages: Message[] = [];
-  messageContent: string;
+  messages: any[] = [];
+  messagesDB: any[] = [];
+  messageContent: string = "";
+  iconText: string = "";
   ioConnection: any;
   room_id: any = "";
   room: any;
@@ -36,6 +40,26 @@ export class ChatComponent implements OnInit, AfterViewInit {
   history: any[] = [];
   details: any[] = [];
   IsShow: boolean = false;
+  isFocus: boolean = false;
+  isShowEmojiInput = false;
+  public openPopup: Function;
+  public form: FormGroup;
+  model: any = '';
+
+
+
+  public input: string = '';
+  public filterEmojis: string = '';
+  public filteredEmojis: any[];
+  public allEmojis: Array<any>;
+  public popupOpen: boolean = false;
+  public lastCursorPosition: number = 0;
+
+
+  @ViewChild('inputMessage') messageInput: ElementRef;
+
+  @ViewChild('inputEmoji') inputEmoji: ElementRef;
+
   dialogRef: MatDialogRef<DialogUserComponent> | null;
   defaultDialogUserParams: any = {
     disableClose: true,
@@ -57,7 +81,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
     private event: AppChatEventService,
     private router: Router,
     private roomSv: roomService,
-
+    public emojiService: EmojiService
   ) {
     this.user = this.event.getUser();
     if (!this.user) {
@@ -72,6 +96,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
       if (results[0][0].content.length > 0) {
         let array = JSON.parse(this.room.content);
         this.messages = array;
+        this.messagesDB = array;
       }
       results[1].forEach(d => {
         if (d.user_id != this.user.id) {
@@ -86,16 +111,21 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
+    this.allEmojis = this.emojiService.getAll();
+    this.clean();
     this.event.getIsShow.emit(this.IsShow);
     this.initModel();
-
+    // this.openPopup(false);
     this.room_id = this.event.getRoom || "defual";
     this.scrollToBottom();
     this.initIoConnection();
   }
   ngOnDestroy(): void {
 
+  }
+
+  abc() {
+    console.log(1);
   }
   ngAfterViewInit(): void {
     // subscribing to any changes in the list of items / messages
@@ -130,14 +160,22 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
     this.ioConnection = this.socketService.onMessage()
       .subscribe((message: any) => {
-        console.log(this.messages);
         this.messages.push(message);
+        this.messageContent = "";
+        console.log(this.messages);
         this.scrollToBottom();
-        this.roomSv.updateRoomContent(this.room.id, this.messages).subscribe(data => {
-          console.log("hi vong mong manh");
-        })
-      });
 
+      });
+      this.socketService.sended()
+      .subscribe((message: any) => {
+        console.log(message);
+        this.messages.forEach(x=>{
+          if(x.m_id == message.m_id){
+            x.date = message.date;
+          }
+        })
+
+      });
 
     // this.socketService.onLoadingRoom().subscribe(data => {
     //   this.history = data;
@@ -199,20 +237,35 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   public sendMessage(message: string): void {
-    console.log(this.details);
+    console.log(message);
     if (!message) {
       return;
     }
+    let m_id = Date.now();
     this.socketService.send({
       room_id: this.room_id,
       details: this.details,
       from: this.user,
-      content: message
+      content: message,
+      m_id:m_id
     });
-    
-    this.messageContent = null;
+    this.messages.push({
+      room_id: this.room_id,
+      details: this.details,
+      from: this.user,
+      content: message,
+      m_id:m_id
+    });
+    this.messageContent = "";
   }
-
+  // public addIcon() {
+  //   console.log(this.text);
+  //   this.messageContent +=this.text;
+  //   this.text = '';
+  // }
+  onKeyup($event) {
+    console.log(1);
+  }
   public sendNotification(params: any, action: Action): void {
     let message: any;
 
@@ -226,5 +279,60 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
   public goToHome() {
     this.router.navigate(['home']);
+  }
+  setPopupAction(fn: any) {
+    this.openPopup = fn;
+  }
+  switchEmojiPicker() {
+    this.isShowEmojiInput = !this.isShowEmojiInput;
+    // this.isFocus = !this.isFocus;
+    this.popupOpen = !this.popupOpen;
+    // this.openPopup();
+  }
+  clean() {
+    this.filterEmojis = '';
+    this.filteredEmojis = this.getFilteredEmojis();
+  }
+  onBlur(event) {
+    this.updateCursor();
+
+  }
+  onFocus(event) {
+    this.updateCursor();
+
+  }
+  updateCursor() {
+    this.lastCursorPosition = this.messageInput.nativeElement.selectionStart;
+    console.log(this.lastCursorPosition);
+  }
+  onEmojiClick(e) {
+    this.messageContent = this.messageContent.substr(0, this.lastCursorPosition) + e + this.messageContent.substr(this.lastCursorPosition);
+  }
+  ngOnChanges() {
+    if (this.model !== this.messageContent) {
+      this.messageContent = this.model;
+    }
+  }
+  onChange(newValue) {
+    this.messageContent = this.emojiService.emojify(newValue);
+    this.model = this.messageContent;
+    console.log(this.messageContent);
+  }
+  updateFilteredEmojis() {
+    this.filteredEmojis = this.getFilteredEmojis();
+  }
+  getFilteredEmojis() {
+    return this.allEmojis.filter((e) => {
+      if (this.filterEmojis === '') {
+        return true;
+      } else {
+        for (let alias of e.aliases) {
+          if (alias.includes(this.filterEmojis)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    });
   }
 }

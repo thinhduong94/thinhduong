@@ -3,27 +3,35 @@
         <button mat-icon-button>
             <mat-icon>settings</mat-icon>
         </button>
-        <span>profile</span>
+        <span class="example-fill-remaining-space">profile</span>
+        <button mat-raised-button color="primary"  (click)="logOut()" mat-icon-button>
+                <mat-icon>settings_power</mat-icon>
+            </button>
     </mat-toolbar>
 </div>
 <div>
-    <table class="content-profile">
-        <tr>
-            <td rowspan="2" class="avata">
-                <div class="avata-centent">
+    <div>
+        <div style="display: flex;margin-top: 10px;">
+            <div class="avata-centent">
+                <div>
                     <span>
-                            {{main.name[0]}}
+                        {{main.name[0]}}
                     </span>
-                  
                 </div>
-            </td>
-            <td>Account</td>
-            <td>{{main.userName}}</td>
-        </tr>
-        <tr>
-            <td>Name</td>
-            <td>{{main.name}}</td>
-        </tr>
-    </table>
-    <button mat-raised-button color="primary" class="add_room" (click)="logOut()">LogOut</button>
+                <div>
+                    <button mat-raised-button color="primary" mat-icon-button>
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div style="text-align: center;margin-top: 10px;">
+            {{main.userName}}
+        </div>
+        <div style="text-align: center;">
+            {{main.name}}
+        </div>
+    </div>
 </div>

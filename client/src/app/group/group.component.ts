@@ -62,7 +62,7 @@ export class GroupComponent implements OnInit {
     this.roomSv.createRoom(_room)
     .finally(()=>this.isLoding = false)
     .subscribe(data => {
-      let message = "Room have been create :3"
+      let message = "Room have been created :3"
       this.snackBar.open(message, "", {
         duration: 2000,
         verticalPosition: 'top',

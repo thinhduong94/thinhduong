@@ -7,7 +7,8 @@ export class db {
       host: "localhost",
       user: "root",
       password: "",
-      database: "chatapp"
+      database: "chatapp",
+      charset : 'utf8mb4'
     });
   }
   public getConnection(){
