@@ -79,6 +79,20 @@ export class roomService {
             callback(err, Result)
         });
     }
+    public createImg(img:any,callback){
+        console.log(JSON.stringify(img));
+        this.db.createImg(img, function (err, Result) {
+            //you might want to do something is err is not null... 
+            callback(err, Result)
+        });
+    }
+    public accept(id:string,callback){
+        console.log(JSON.stringify(id));
+        this.db.accept(id, function (err, Result) {
+            //you might want to do something is err is not null... 
+            callback(err, Result)
+        });
+    }
     public updateRoom(id:string,name:string,callback){
         console.log(JSON.stringify(id));
         this.db.updateRoom(id,name, function (err, Result) {

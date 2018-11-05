@@ -26,6 +26,10 @@ export class roomService {
     updateRoomContent(id:string,content:any):Observable<any>  {
         return this.http.put<any>(API+'updateRoomContent?id='+id,JSON.stringify(content));
     }
+    accept(id:string):Observable<any>  {
+        return this.http.put<any>(API+'accept?id='+id,JSON.stringify({}));
+    }
+    
     getDetailByRoomId(id:string):Observable<any>  {
         return this.http.get<any>(API+'getDetailByRoomId?id='+id);
     }

@@ -147,6 +147,12 @@ export class ChatServer {
                 console.log("loadingRoom" + JSON.stringify(rs));
                 socket.emit('loadingRoom', rs);
             })
+            socket.on('messageImg', (m: any) => {
+                console.log("messages:" + JSON.stringify(m));
+                m.date = Date.now();
+                this.io.emit('notification', { data: m.details });
+                this.io.to(m.room_id).emit('sendedImg', m);
+            });
             socket.on('message', (m: any) => {
                 console.log("messages:" + JSON.stringify(m));
 
@@ -333,6 +339,24 @@ export class ChatServer {
                 req.on('end', () => {
                     let content = JSON.parse(body);
                     let a = this.roomSv.updateRoomContent(id, content, function (err, Result) {
+                        res.send({ "data": Result });
+                    });
+                });
+            }
+
+        });
+        this.app.put('/accept', (req, res) => {
+            res.header('Access-Control-Allow-Origin', '*');
+            console.log(req.method);
+            if (req.method === 'PUT') {
+                let body = '';
+                let id = req.query.id;
+                req.on('data', chunk => {
+
+                    body += chunk.toString(); // convert Buffer to string
+                });
+                req.on('end', () => {
+                    let a = this.roomSv.accept(id, function (err, Result) {
                         res.send({ "data": Result });
                     });
                 });

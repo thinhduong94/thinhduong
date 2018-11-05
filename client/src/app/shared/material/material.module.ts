@@ -19,6 +19,7 @@ import {
   MatSnackBarModule,
   MatGridListModule, 
 } from '@angular/material';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   imports: [
@@ -42,7 +43,8 @@ import {
    MatProgressSpinnerModule,
    MatProgressBarModule,
    MatSnackBarModule,
-   MatGridListModule
+   MatGridListModule,
+   BrowserAnimationsModule
   ],
   exports: [
     MatButtonModule, 
@@ -59,7 +61,8 @@ import {
     MatAutocompleteModule,
     MatProgressBarModule,
     MatSnackBarModule,
-    MatGridListModule
+    MatGridListModule,
+    BrowserAnimationsModule
   ],
   declarations: [],
   providers: [

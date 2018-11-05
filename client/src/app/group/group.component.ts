@@ -92,7 +92,7 @@ export class GroupComponent implements OnInit {
     .finally(()=>this.isLoding = false)
     .subscribe(data=>{
       this.friends = data || [];
-      this.friends = this.friends.map(val => ({
+      this.friends = this.friends.filter(x=>x.status_room=='accept').map(val => ({
         id: val.user_id,
         name: val.name,
         userName: val.userName,

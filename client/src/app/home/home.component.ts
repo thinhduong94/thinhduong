@@ -12,6 +12,7 @@ import * as moment from 'moment';
 import 'rxjs/Rx';
 import * as _ from 'lodash';
 import { userService } from 'app/service/userService';
+import { room } from 'app/model/room';
 @Component({
   selector: 'tcc-home',
   templateUrl: './home.component.html',
@@ -32,8 +33,10 @@ export class HomeComponent implements OnInit {
     }
   };
   users: any[] = [];
+  _users: any[] = [];
   user: any = {};
   rooms: any[] = [];
+  _histories: any[] = [];
   histories: any[] = [];
   IsShow: boolean = true;
   isLoading: boolean;
@@ -106,22 +109,31 @@ export class HomeComponent implements OnInit {
     ])
       .finally(() => this.isLoading = false)
       .subscribe((results: any[]) => {
-        this.users = results[0] || [];
 
-        this.users = this.users.map(val => ({
+        this.histories = [];
+
+        this._users = results[0] || [];
+
+        this._users = this._users.map(val => ({
           id: val.room_id,
           user_id: val.id,
           name: val.name,
           type: val.type,
           content: val.content,
-          status: val.status
+          status: val.status,
+          user_Friend: val.user_Friend,
+          status_room: val.status_room
         }));
 
+        this._users.forEach(u => {
+          if ((u.status_room == '' || u.status_room == 'accept') || (u.user_Friend == this.user.id && u.status_room == 'pending')) {
+            this.users.push(u);
+          }
+        })
+
         this.rooms = results[1] || [];
-        this.histories = results[2] || [];
-
-
-        this.histories.forEach(x => {
+        this._histories = results[2] || [];
+        this._histories.forEach(x => {
 
           if (x.type == "private") {
             let user = "";
@@ -142,14 +154,20 @@ export class HomeComponent implements OnInit {
 
           }
 
-
           if (x.content.length > 0) {
             let array = x.content == "" ? [] : JSON.parse(x.content);
             x.lasterMess = array[array.length - 1];
+            if(x.lasterMess.type == 'img'){
+              x.lasterMess.content = "image"
+            }
           }
         })
 
-
+        this._histories.forEach(h => {
+          if (h.type == room || (h.type == "private" && (h.status_room == 'accept' || h.status_room == ''))) {
+            this.histories.push(h);
+          }
+        })
         this.histories = this.histories.map(val => ({
           id: val.room_id,
           name: val.name,
@@ -207,7 +225,7 @@ export class HomeComponent implements OnInit {
       this.users.forEach(x => {
         if (x.user_id == data.id) {
           x.status = true;
-          let message = data.name +" Online :3";
+          let message = data.name + " Online :3";
           this.snackBar.open(message, "", {
             duration: 2000,
             verticalPosition: 'top',
@@ -222,7 +240,7 @@ export class HomeComponent implements OnInit {
       this.users.forEach(x => {
         if (x.user_id == data.id) {
           x.status = false;
-          let message = data.name +" Offline :3";
+          let message = data.name + " Offline :3";
           this.snackBar.open(message, "", {
             duration: 2000,
             verticalPosition: 'top',

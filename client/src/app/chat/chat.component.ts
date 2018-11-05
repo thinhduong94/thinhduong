@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChildren, ViewChild, AfterViewInit, QueryList, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChildren, ViewChild, AfterViewInit, QueryList, EventEmitter, ElementRef, Input, Output } from '@angular/core';
 import { MatDialog, MatDialogRef, MatList, MatListItem } from '@angular/material';
 
 import { Action } from './shared/model/action';
@@ -12,17 +12,28 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscriber } from 'rxjs/Subscriber';
 import { AppChatEventService } from 'app/app-chat-event.service';
 import { roomService } from 'app/service/roomService';
-
+import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/Rx';
 import { FormGroup } from '@angular/forms';
 import { EmojiService } from 'app/shared/emojiCustomize/emojiSevice';
+import { Subscription } from 'rxjs/Subscription';
+import { of } from 'rxjs/observable/of';
+import { catchError, last, map, tap } from 'rxjs/operators';
 const AVATAR_URL = 'https://api.adorable.io/avatars/285';
 
 @Component({
   selector: 'tcc-chat',
   templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css']
+  styleUrls: ['./chat.component.css'],
+  animations: [
+    trigger('fadeInOut', [
+      state('in', style({ opacity: 100 })),
+      transition('* => void', [
+        animate(300, style({ opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class ChatComponent implements OnInit, AfterViewInit {
   getUserChat: any;
@@ -54,12 +65,25 @@ export class ChatComponent implements OnInit, AfterViewInit {
   public allEmojis: Array<any>;
   public popupOpen: boolean = false;
   public lastCursorPosition: number = 0;
+  /** Link text */
+  @Input() text = 'Upload';
+  /** Name used in form which will be sent in HTTP request. */
+  @Input() param = 'file';
+  /** Target URL for file uploading. */
+  @Input() target = 'https://file.io';
+  /** File extension that accepted, same as 'accept' of <input type="file" />. 
+      By the default, it's set to 'image/*'. */
+  @Input() accept = 'image/*';
+  /** Allow you to add handler after its completion. Bubble up response text from remote. */
+  @Output() complete = new EventEmitter<string>();
 
+  private files: Array<FileUploadModel> = [];
 
   @ViewChild('inputMessage') messageInput: ElementRef;
 
   @ViewChild('inputEmoji') inputEmoji: ElementRef;
-
+  url: string = '';
+  swap: string = '';
   dialogRef: MatDialogRef<DialogUserComponent> | null;
   defaultDialogUserParams: any = {
     disableClose: true,
@@ -164,13 +188,19 @@ export class ChatComponent implements OnInit, AfterViewInit {
         this.messageContent = "";
         console.log(this.messages);
         this.scrollToBottom();
-
       });
-      this.socketService.sended()
+    this.socketService.onsendedImg()
+      .subscribe((message: any) => {
+        this.messages.push(message);
+        this.messageContent = "";
+        console.log(this.messages);
+        this.scrollToBottom();
+      });
+    this.socketService.sended()
       .subscribe((message: any) => {
         console.log(message);
-        this.messages.forEach(x=>{
-          if(x.m_id == message.m_id){
+        this.messages.forEach(x => {
+          if (x.m_id == message.m_id) {
             x.date = message.date;
           }
         })
@@ -247,14 +277,14 @@ export class ChatComponent implements OnInit, AfterViewInit {
       details: this.details,
       from: this.user,
       content: message,
-      m_id:m_id
+      m_id: m_id
     });
     this.messages.push({
       room_id: this.room_id,
       details: this.details,
       from: this.user,
       content: message,
-      m_id:m_id
+      m_id: m_id
     });
     this.messageContent = "";
   }
@@ -283,10 +313,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
   setPopupAction(fn: any) {
     this.openPopup = fn;
   }
-  switchEmojiPicker() {
+  switchEmojiPicker(type) {
     this.isShowEmojiInput = !this.isShowEmojiInput;
     // this.isFocus = !this.isFocus;
     this.popupOpen = !this.popupOpen;
+    this.swap = type;
     // this.openPopup();
   }
   clean() {
@@ -335,4 +366,126 @@ export class ChatComponent implements OnInit, AfterViewInit {
       return false;
     });
   }
+  onClick() {
+    const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
+    fileUpload.onchange = () => {
+      for (let index = 0; index < fileUpload.files.length; index++) {
+        const file = fileUpload.files[index];
+        this.files.push({
+          data: file, state: 'in',
+          inProgress: false, progress: 0, canRetry: false, canCancel: true
+        });
+      }
+      this.uploadFiles();
+    };
+    fileUpload.click();
+  }
+
+  cancelFile(file: FileUploadModel) {
+    file.sub.unsubscribe();
+    this.removeFileFromArray(file);
+  }
+
+  retryFile(file: FileUploadModel) {
+    this.uploadFile(file);
+    file.canRetry = false;
+  }
+
+  private uploadFile(file: FileUploadModel) {
+    // const fd = new FormData();
+    // fd.append(this.param, file.data);
+
+    // const req = new HttpRequest('POST', this.target, fd, {
+    //   reportProgress: true
+    // });
+
+    // file.inProgress = true;
+    // file.sub = this._http.request(req).pipe(
+    //   map(event => {
+    //     switch (event.type) {
+    //       case HttpEventType.UploadProgress:
+    //         file.progress = Math.round(event.loaded * 100 / event.total);
+    //         break;
+    //       case HttpEventType.Response:
+    //         return event;
+    //     }
+    //   }),
+    //   tap(message => { }),
+    //   last(),
+    //   catchError((error: HttpErrorResponse) => {
+    //     file.inProgress = false;
+    //     file.canRetry = true;
+    //     return of(`${file.data.name} upload failed.`);
+    //   })
+    // ).subscribe(
+    //   (event: any) => {
+    //     if (typeof (event) === 'object') {
+    //       this.removeFileFromArray(file);
+    //       this.complete.emit(event.body);
+    //     }
+    //   }
+    //   );
+  }
+
+  private uploadFiles() {
+    const fileUpload = document.getElementById('fileUpload') as HTMLInputElement;
+    fileUpload.value = '';
+
+    this.files.forEach(file => {
+      this.uploadFile(file);
+    });
+  }
+
+  private removeFileFromArray(file: FileUploadModel) {
+    const index = this.files.indexOf(file);
+    if (index > -1) {
+      this.files.splice(index, 1);
+    }
+  }
+  sendImg() {
+    if (this.url) {
+      console.log(this.url);
+      if (!this.url) {
+        return;
+      }
+      let m_id = Date.now();
+      this.socketService.send({
+        room_id: this.room_id,
+        details: this.details,
+        from: this.user,
+        content: this.url,
+        m_id: m_id,
+        type:"img"
+      });
+      this.messages.push({
+        room_id: this.room_id,
+        details: this.details,
+        from: this.user,
+        content: this.url,
+        m_id: m_id,
+        type:"img"
+      });
+      this.messageContent = "";
+    }
+}
+readURL(event: any) {
+  if (event.target.files && event.target.files[0]) {
+    var reader = new FileReader();
+
+    reader.onload = (event: any) => {
+      this.url = event.target.result;
+    }
+
+    reader.readAsDataURL(event.target.files[0]);
+  }
+}
+}
+export class FileUploadModel {
+  data: File;
+  state: string;
+  inProgress: boolean;
+  progress: number;
+  canRetry: boolean;
+  canCancel: boolean;
+  sub?: Subscription;
 }

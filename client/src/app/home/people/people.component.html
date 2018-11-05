@@ -1,10 +1,13 @@
 <mat-list>
     <mat-list-item *ngFor="let item of users" >
         <mat-icon matListIcon>person</mat-icon>
-        <h4 matLine (click)="chat(item)">{{item.name}}</h4>
+        <h4 matLine (click)="chat(item)">{{item.name}} </h4>
         <p matLine class="demo-2"> {{item.status ? 'Online':'Offline'}}  </p>
-        <button  mat-raised-button mat-icon-button (click)="unFriend(item)" color="primary">
+        <button *ngIf = "(item.status_room =='' || item.status_room == 'accept')"  mat-raised-button mat-icon-button (click)="unFriend(item)" color="primary">
             <mat-icon>person_add_disabled</mat-icon>  
         </button>
+        <button *ngIf="(item.user_Friend == user.id && item.status_room == 'pending')" mat-raised-button mat-icon-button (click)="accept(item)" color="primary">
+                <mat-icon>done</mat-icon>  
+            </button>
     </mat-list-item>
 </mat-list>

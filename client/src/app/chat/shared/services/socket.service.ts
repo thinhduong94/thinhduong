@@ -41,7 +41,10 @@ export class SocketService {
     public loadingRoom(data: any) {
         this.socket.emit('loadingRoom', data);
     }
-
+    public messageImg(data: any) {
+        this.socket.emit('messageImg', data);
+    }
+    
     public login(data: any) {
         this.socket.emit('login', data);
     }
@@ -80,9 +83,15 @@ export class SocketService {
             this.socket.on('logOut', (data: any) => observer.next(data));
         });
     }
+    
     public onGetNotification(): Observable<any> {
         return new Observable<any>(observer => {
             this.socket.on('notification', (data: any) => observer.next(data));
+        });
+    }
+    public onsendedImg(): Observable<any> {
+        return new Observable<any>(observer => {
+            this.socket.on('sendedImg', (data: any) => observer.next(data));
         });
     }
     public sended(): Observable<any> {

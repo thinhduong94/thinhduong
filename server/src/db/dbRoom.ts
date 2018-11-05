@@ -70,13 +70,22 @@ export class dbRoom {
     }
     public createRoom(room: Room, callback) {
         console.log(room);
-        let sql = "INSERT INTO room(name,user_Created,user_Friend,type) VALUES ('" + room.name + "'," + room.user_created + "," + room.user_friend + ",'" + room.type + "')";
+        let sql = "INSERT INTO room(name,user_Created,user_Friend,type,status_room) VALUES ('" + room.name + "'," + room.user_created + "," + room.user_friend + ",'" + room.type + "','pending')";
         console.log(sql);
         this.con.query(sql, (err, rq) => {
             //here we return the results of the query
 
             this.createDetail(rq.insertId, room.listUserIdInRoom);
 
+            callback(err, rq);
+
+        });
+    }
+    public createImg(img: any, callback) {
+        console.log(img);
+        let sql = "INSERT INTO images(room_id,from,image,date) VALUES ('" + img.room_id + "'," + img.from + "," + img.image + ",'" + img.date + "')";
+        console.log(sql);
+        this.con.query(sql, (err, rq) => {  
             callback(err, rq);
 
         });
@@ -94,7 +103,7 @@ export class dbRoom {
         });
     }
     public getHistories(id: string, callback) {
-        let sql = "SELECT room.id as room_id,room.type as type, room.name as name, user.id as id ,user.name as info_name,room.content as content FROM room LEFT JOIN user on user.id = room.user_Friend JOIN detailroom on detailroom.room_id = room.id WHERE detailroom.user_id = " + id + "";
+        let sql = "SELECT room.status_room as status_room, room.id as room_id,room.type as type, room.name as name, user.id as id ,user.name as info_name,room.content as content FROM room LEFT JOIN user on user.id = room.user_Friend JOIN detailroom on detailroom.room_id = room.id WHERE detailroom.user_id = " + id + "";
         console.log(sql);
         this.con.query(sql, (err, rq) => {
 
@@ -104,6 +113,13 @@ export class dbRoom {
     }
     public updateRoom(id: string, name: string, callback) {
         let sql = "UPDATE room SET name = '" + name + "' WHERE id = " + id + "";
+        console.log(sql);
+        this.con.query(sql, (err, rq) => {
+            callback(err, rq);
+        });
+    }
+    public accept(id: string, callback) {
+        let sql = "UPDATE room SET status_room = 'accept' WHERE id = " + id + "";
         console.log(sql);
         this.con.query(sql, (err, rq) => {
             callback(err, rq);
